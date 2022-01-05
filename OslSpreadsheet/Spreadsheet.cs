@@ -1,25 +1,26 @@
 ﻿using OoxSpreadsheet.Models.Files.xlsx;
 using OoxSpreadsheet.Services;
+using OslSpreadsheet.Models;
 
 namespace OoxSpreadsheet
 {
     public interface ISpreadsheet : IDisposable, IAsyncDisposable
-    { 
-        ooxWorkbook Workbook { get; }
+    {
+        OslSpreadsheet.Models.oWorkbook Workbook { get; }
 
         Task<byte[]> GenerateFileAsync();
     }
 
     public class Spreadsheet : ISpreadsheet
     {
-        private readonly ooxWorkbook _workbook;
+        private readonly OslSpreadsheet.Models.oWorkbook _workbook;
 
         public Spreadsheet()
         {
-            _workbook = new ooxWorkbook();
+            _workbook = new OslSpreadsheet.Models.oWorkbook();
         }
         
-        public ooxWorkbook Workbook  { get => _workbook; }
+        public OslSpreadsheet.Models.oWorkbook Workbook  { get => _workbook; }
 
 
         public async Task<byte[]> GenerateFileAsync()
@@ -53,7 +54,8 @@ namespace OoxSpreadsheet
                     break;
             }
 
-            return await _fileService.GenerateFileAsync(new ooxContentTypes(_workbook), _workbook);
+            //return await _fileService.GenerateFileAsync(_workbook);
+            return new byte[0];
         }
 
         public async ValueTask DisposeAsync()

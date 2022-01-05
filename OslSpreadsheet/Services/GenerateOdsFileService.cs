@@ -16,7 +16,7 @@ namespace OoxSpreadsheet.Services
             throw new NotImplementedException();
         }
 
-        public Task<byte[]> GenerateFileAsync(ooxContentTypes types, ooxWorkbook workbook)
+        public Task<byte[]> GenerateFileAsync(oWorkbook workbook)
         {
             throw new NotImplementedException();
         }

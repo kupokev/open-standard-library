@@ -18,12 +18,14 @@ namespace OoxSpreadsheet.Services
             throw new NotImplementedException();
         }
 
-        public async Task<byte[]> GenerateFileAsync(ooxContentTypes types, ooxWorkbook workbook)
+        public async Task<byte[]> GenerateFileAsync(oWorkbook workbook)
         {
             byte[] output;
 
             try
             {
+                var types = new ooxContentTypes(workbook);
+
                 List<InMemoryFile> files = new();
 
                 var fileLists = types.Parts.Select(x => x.PartName).ToList();

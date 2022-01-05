@@ -8,7 +8,7 @@ namespace OoxSpreadsheet.Models.Files.xlsx
         // Have to have a parameterless constructor to be able to serialize class
         public ooxContentTypes() { }
 
-        public ooxContentTypes(ooxWorkbook workbook)
+        public ooxContentTypes(oWorkbook workbook)
         {
             Extensions = new List<ooxExtension>();
 

@@ -14,13 +14,22 @@ using IHost host = Host.CreateDefaultBuilder(args)
 
 await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
 {
-    var sheetId = spreadsheet.Workbook.AddSheet();
+    var workbook = spreadsheet.Workbook;
 
-    var newSheetId = spreadsheet.Workbook.AddSheet();
+    var sheet1 = await workbook.AddSheetAsync();
+    var sheet2 = await workbook.AddSheetAsync("Stuff");
 
-    var compressedFile = await spreadsheet.GenerateFileAsync();
+    var cell = sheet2.AddCell(1, 1);
+    cell.Value = "300.20";
+    cell.ValueType = OslSpreadsheet.Models.CellValueType.Float;
 
-    await File.WriteAllBytesAsync(@"C:\Temp\New File.zip", compressedFile);
+    var sheet3 = await spreadsheet.Workbook.AddSheetAsync();
+
+    spreadsheet.Workbook.AddSheet("Foo");
+
+    //var compressedFile = await spreadsheet.GenerateFileAsync();
+
+    //await File.WriteAllBytesAsync(@"C:\Temp\New File.zip", compressedFile);
 }
 
 await host.RunAsync();
