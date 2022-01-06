@@ -1,14 +1,15 @@
-﻿using OoxSpreadsheet.Models.Files.xlsx;
-using OoxSpreadsheet.Services;
+﻿using OoxSpreadsheet.Services;
 using OslSpreadsheet.Models;
 
 namespace OoxSpreadsheet
 {
     public interface ISpreadsheet : IDisposable, IAsyncDisposable
     {
-        OslSpreadsheet.Models.oWorkbook Workbook { get; }
+        oWorkbook Workbook { get; }
 
-        Task<byte[]> GenerateFileAsync();
+        Task<byte[]> GenerateOdsFileAsync();
+
+        Task<byte[]> GenerateXlsxFileAsync();
     }
 
     public class Spreadsheet : ISpreadsheet
@@ -23,39 +24,18 @@ namespace OoxSpreadsheet
         public OslSpreadsheet.Models.oWorkbook Workbook  { get => _workbook; }
 
 
-        public async Task<byte[]> GenerateFileAsync()
+        public async Task<byte[]> GenerateOdsFileAsync()
         {
-            return await GenerateFileAsync(SpreadsheetFileFormat.XLSX);
+            IGenerateFile _fileService = new GenerateOdsFileService();
+
+            return await _fileService.GenerateFileAsync(Workbook);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public async Task<byte[]> GenerateFileAsync(SpreadsheetFileFormat fileFormat)
+        public async Task<byte[]> GenerateXlsxFileAsync()
         {
-            IGenerateFile _fileService;
+            IGenerateFile _fileService = new GenerateXlsxFileService();
 
-            switch (fileFormat)
-            {
-                case SpreadsheetFileFormat.ODS:
-                    _fileService = new GenerateXlsxFileService();
-
-                    throw new NotImplementedException();
-
-                case SpreadsheetFileFormat.XLSM:
-                    _fileService = new GenerateXlsxFileService();
-
-                    throw new NotImplementedException();
-
-                default:
-                case SpreadsheetFileFormat.XLSX:
-                    _fileService = new GenerateXlsxFileService();
-                    break;
-            }
-
-            //return await _fileService.GenerateFileAsync(_workbook);
-            return new byte[0];
+            return await _fileService.GenerateFileAsync(Workbook);
         }
 
         public async ValueTask DisposeAsync()

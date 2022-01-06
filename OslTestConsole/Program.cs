@@ -12,6 +12,12 @@ using IHost host = Host.CreateDefaultBuilder(args)
             .AddTransient<ISpreadsheet, Spreadsheet>()
     ).Build();
 
+// Begin test code:
+
+// Create file content holder
+var fileContent = new byte[0];
+
+// Generate spreadsheet
 await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
 {
     var workbook = spreadsheet.Workbook;
@@ -27,9 +33,11 @@ await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
 
     spreadsheet.Workbook.AddSheet("Foo");
 
-    //var compressedFile = await spreadsheet.GenerateFileAsync();
-
-    //await File.WriteAllBytesAsync(@"C:\Temp\New File.zip", compressedFile);
+    // Convert spreadsheet to compressed file
+    fileContent = await spreadsheet.GenerateOdsFileAsync();    
 }
+
+// Save compressed file
+await File.WriteAllBytesAsync(@"C:\Temp\New File.zip", fileContent);
 
 await host.RunAsync();

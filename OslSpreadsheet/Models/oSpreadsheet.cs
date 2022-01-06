@@ -1,6 +1,6 @@
 ﻿namespace OslSpreadsheet.Models
 {
-    public  class oSpreadsheet
+    public class oSpreadsheet
     {
         private readonly int _index;
 
@@ -26,7 +26,7 @@
             return _AddCell(new oCell(row, column));
         }
 
-        public async Task<oCell> AddSheetAsync(int row, int column)
+        public async Task<oCell> AddCellAsync(int row, int column)
         {
             return await Task.Run(() => _AddCell(new oCell(row, column)));
         }

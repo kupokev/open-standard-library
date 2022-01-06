@@ -1,11 +1,7 @@
 ﻿using OoxSpreadsheet.Models;
 using OoxSpreadsheet.Models.Files.xlsx;
-using System;
-using System.Collections.Generic;
+using OslSpreadsheet.Models;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OoxSpreadsheet.Services
 {
@@ -24,7 +20,10 @@ namespace OoxSpreadsheet.Services
 
             try
             {
-                var types = new ooxContentTypes(workbook);
+                // TODO: need to convert oWorkbook to ooxWorkbook
+                ooxWorkbook wb = new(); 
+
+                var types = new ooxContentTypes(wb);
 
                 List<InMemoryFile> files = new();
 
@@ -46,8 +45,8 @@ namespace OoxSpreadsheet.Services
                 {
                     object? o = null;
 
-                    if (file.Contains("/workbook.xml")) o = workbook;
-                    if (file.Contains("/xl/worksheets/")) o = workbook.Sheets.First(x => x.name == file.Replace("/xl/worksheets/", "").Replace(".xml", ""));
+                    if (file.Contains("/workbook.xml")) o = wb;
+                    if (file.Contains("/xl/worksheets/")) o = wb.Sheets.First(x => x.name == file.Replace("/xl/worksheets/", "").Replace(".xml", ""));
 
                     files.Add(new InMemoryFile()
                     {

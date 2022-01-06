@@ -18,7 +18,7 @@
         {
             var index = _nextSheetIndex;
 
-            return _AddSheet(new oSpreadsheet(index, String.Format("Sheet{0}", index)));
+            return _AddSheet(new oSpreadsheet(index, string.Format("Sheet{0}", index)));
         }
 
         public oSpreadsheet AddSheet(string name)
@@ -32,7 +32,7 @@
         {
             var index = _nextSheetIndex;
 
-            return await Task.Run(() => _AddSheet(new oSpreadsheet(index, String.Format("Sheet{0}", index))));
+            return await Task.Run(() => _AddSheet(new oSpreadsheet(index, string.Format("Sheet{0}", index))));
         }
 
         public async Task<oSpreadsheet> AddSheetAsync(string name)
