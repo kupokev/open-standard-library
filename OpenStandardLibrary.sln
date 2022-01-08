@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OslSpreadsheet", "OslSpreadsheet\OslSpreadsheet.csproj", "{12921BFB-65BC-4AC4-A1BD-A4948E828F44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OslSpreadsheet", "OslSpreadsheet\OslSpreadsheet.csproj", "{12921BFB-65BC-4AC4-A1BD-A4948E828F44}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OslTestConsole", "OslTestConsole\OslTestConsole.csproj", "{6793389F-A4A0-4BCE-95A8-80C0BAF4CC66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Examples", "Examples\Examples.csproj", "{6793389F-A4A0-4BCE-95A8-80C0BAF4CC66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

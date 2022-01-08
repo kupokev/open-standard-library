@@ -1,4 +1,4 @@
-﻿namespace OoxSpreadsheet.Models
+﻿namespace OslSpreadsheet.Models
 {
     internal class InMemoryFile
     {

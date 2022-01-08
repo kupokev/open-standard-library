@@ -1,6 +1,6 @@
-﻿using OoxSpreadsheet.Models;
-using OoxSpreadsheet.Models.Files.xlsx;
+﻿using OoxSpreadsheet.Models.Files.xlsx;
 using OslSpreadsheet.Models;
+using OslSpreadsheet.Services;
 using System.IO.Compression;
 
 namespace OoxSpreadsheet.Services
@@ -21,9 +21,9 @@ namespace OoxSpreadsheet.Services
             try
             {
                 // TODO: need to convert oWorkbook to ooxWorkbook
-                ooxWorkbook wb = new(); 
+                OXWorkbook wb = new(); 
 
-                var types = new ooxContentTypes(wb);
+                var types = new OXContentTypes(wb);
 
                 List<InMemoryFile> files = new();
 
@@ -67,6 +67,8 @@ namespace OoxSpreadsheet.Services
                 }
 
                 output = archiveStream.ToArray();
+
+                //output = await ZipService.GenerateZipAsync(files);
             }
             catch
             {

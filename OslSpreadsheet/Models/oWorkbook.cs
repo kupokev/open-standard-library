@@ -12,6 +12,17 @@
             get => Sheets.Any() ? Sheets.Max(x => x.Index) + 1 : 1;
         }
 
+        /// <summary>
+        /// Application that generated this file
+        /// </summary>
+        public string Generator { get; set; } = "Open Standard Library v1";
+
+        public string InitialCreator { get; set; } = "";
+
+        public string Creator { get; set; } = "";
+
+        public string CreationDate { get; set; } = "";
+
         public List<oSpreadsheet> Sheets { get; set; }
 
         public oSpreadsheet AddSheet()

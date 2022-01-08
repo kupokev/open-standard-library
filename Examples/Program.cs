@@ -14,9 +14,6 @@ using IHost host = Host.CreateDefaultBuilder(args)
 
 // Begin test code:
 
-// Create file content holder
-var fileContent = new byte[0];
-
 // Generate spreadsheet
 await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
 {
@@ -33,11 +30,17 @@ await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
 
     spreadsheet.Workbook.AddSheet("Foo");
 
-    // Convert spreadsheet to compressed file
-    fileContent = await spreadsheet.GenerateOdsFileAsync();    
-}
+    // Convert spreadsheet to compressed file (ODS)
+    var odsFile = await spreadsheet.GenerateOdsFileAsync();
 
-// Save compressed file
-await File.WriteAllBytesAsync(@"C:\Temp\New File.zip", fileContent);
+    // Save compressed file
+    await File.WriteAllBytesAsync(@"C:\Temp\New File (ODS).zip", odsFile);
+
+    // Convert spreadsheet to compressed file (XLSX)
+    var xlsxFile = await spreadsheet.GenerateXlsxFileAsync();
+
+    // Save compressed file
+    await File.WriteAllBytesAsync(@"C:\Temp\New File (XLSX).zip", xlsxFile);
+}
 
 await host.RunAsync();

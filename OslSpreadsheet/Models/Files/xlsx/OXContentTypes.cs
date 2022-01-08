@@ -3,12 +3,12 @@
 namespace OoxSpreadsheet.Models.Files.xlsx
 {
     [XmlRoot("Types", ElementName = "Types", Namespace = "http://schemas.openxmlformats.org/package/2006/content-types", IsNullable = false)]
-    public class ooxContentTypes
+    public class OXContentTypes
     {
         // Have to have a parameterless constructor to be able to serialize class
-        public ooxContentTypes() { }
+        public OXContentTypes() { }
 
-        public ooxContentTypes(ooxWorkbook workbook)
+        public OXContentTypes(OXWorkbook workbook)
         {
             Extensions = new List<ooxExtension>();
 

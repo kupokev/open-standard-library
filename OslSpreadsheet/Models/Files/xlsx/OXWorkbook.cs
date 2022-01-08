@@ -4,12 +4,12 @@ using System.Xml.Serialization;
 namespace OoxSpreadsheet.Models.Files.xlsx
 {
     [XmlRoot("workbook", ElementName = "workbook", Namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main")]
-    public class ooxWorkbook
+    public class OXWorkbook
     {
         [XmlNamespaceDeclarations]
         public XmlSerializerNamespaces xmlns;
 
-        public ooxWorkbook()
+        public OXWorkbook()
         {
             fileVersion = new FileVersion();
 
