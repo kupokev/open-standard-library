@@ -5,7 +5,7 @@ using System.Text;
 
 namespace OoxSpreadsheet.Services
 {
-    internal class GenerateOdsFileService : IGenerateFile
+    internal class OdsFileService : IFileService
     {
         private bool disposedValue;
 
@@ -64,6 +64,11 @@ namespace OoxSpreadsheet.Services
             }
 
             return output;
+        }
+
+        public async Task<oWorkbook> GenerateModel(byte[] file)
+        {
+            throw new NotImplementedException();
         }
 
         protected virtual void Dispose(bool disposing)

@@ -2,7 +2,7 @@
 
 namespace OoxSpreadsheet.Services
 {
-    internal class GenerateXlsmFileService : IGenerateFile
+    internal class XlsmFileService : IFileService
     {
         private bool disposedValue;
 
@@ -11,7 +11,12 @@ namespace OoxSpreadsheet.Services
             throw new NotImplementedException();
         }
 
-        public Task<byte[]> GenerateFileAsync(oWorkbook workbook)
+        public async Task<byte[]> GenerateFileAsync(oWorkbook workbook)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<oWorkbook> GenerateModel(byte[] file)
         {
             throw new NotImplementedException();
         }

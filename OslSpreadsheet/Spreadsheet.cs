@@ -26,14 +26,14 @@ namespace OoxSpreadsheet
 
         public async Task<byte[]> GenerateOdsFileAsync()
         {
-            IGenerateFile _fileService = new GenerateOdsFileService();
+            IFileService _fileService = new OdsFileService();
 
             return await _fileService.GenerateFileAsync(Workbook);
         }
 
         public async Task<byte[]> GenerateXlsxFileAsync()
         {
-            IGenerateFile _fileService = new GenerateXlsxFileService();
+            IFileService _fileService = new XlsxFileService();
 
             return await _fileService.GenerateFileAsync(Workbook);
         }

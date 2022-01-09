@@ -36,10 +36,22 @@ namespace OoxSpreadsheet.Services
 
                 return file;
             }
-            catch
+            catch(Exception ex)
             {
                 return new byte[0];
             }
+        }
+
+        internal static async Task<object> ConvertToObject<T>(string xml)
+        {
+            T retval = default(T);
+
+            using (var reader = new StringReader(xml))
+            {
+                retval = (T)new XmlSerializer(typeof(T)).Deserialize(reader);
+            }
+
+            return retval;
         }
     }
 }

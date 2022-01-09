@@ -5,7 +5,7 @@ using System.IO.Compression;
 
 namespace OoxSpreadsheet.Services
 {
-    internal class GenerateXlsxFileService : IGenerateFile
+    internal class XlsxFileService : IFileService
     {
         private bool disposedValue;
 
@@ -76,6 +76,11 @@ namespace OoxSpreadsheet.Services
             }
 
             return output;
+        }
+
+        public async Task<oWorkbook> GenerateModel(byte[] file)
+        {
+            throw new NotImplementedException();
         }
 
         protected virtual void Dispose(bool disposing)

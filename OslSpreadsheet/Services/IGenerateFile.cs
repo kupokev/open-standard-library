@@ -2,8 +2,10 @@
 
 namespace OoxSpreadsheet.Services
 {
-    internal interface IGenerateFile : IDisposable, IAsyncDisposable
+    internal interface IFileService : IDisposable, IAsyncDisposable
     {
         Task<byte[]> GenerateFileAsync(oWorkbook workbook);
+
+        Task<oWorkbook> GenerateModel(byte[] file);
     }
 }
