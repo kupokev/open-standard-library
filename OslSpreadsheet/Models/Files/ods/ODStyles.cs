@@ -70,15 +70,15 @@ namespace OslSpreadsheet.Models.Files.ods
             public DefaultStyles()
             {
                 numberStyle = new();
-                style = new();
+                //style = new();
                 defaultStyle = new();
             }
 
             [XmlElement("number-style", ElementName = "number-style")]
             public NumberStyle numberStyle { get; set; }
 
-            [XmlElement("style", ElementName = "style")]
-            public Style style { get; set; }
+            //[XmlElement("style", ElementName = "style")]
+            //public Style style { get; set; }
 
             [XmlElement("default-style", ElementName = "default-style")]
             public DefaultStyle defaultStyle { get; set; }
@@ -91,7 +91,7 @@ namespace OslSpreadsheet.Models.Files.ods
                 }
 
                 [XmlAttribute("name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
-                public string Name { get; set; } = "NO";
+                public string Name { get; set; } = "N0";
 
                 [XmlElement("number", ElementName = "number")]
                 public List<Number> Numbers { get; set; }
@@ -118,7 +118,7 @@ namespace OslSpreadsheet.Models.Files.ods
                 public string Family { get; set; } = "table-cell";
 
                 [XmlAttribute("data-style-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
-                public string DataStyleName { get; set; } = "NO";
+                public string DataStyleName { get; set; } = "N0";
 
                 [XmlElement("table-cell-properties", ElementName = "table-cell-properties")]
                 public TableCellProperties tableCellProperties { get; set; }

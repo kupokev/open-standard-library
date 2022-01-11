@@ -16,25 +16,33 @@ namespace OoxSpreadsheet.Services
                 // Settings
                 var settings = new XmlWriterSettings
                 {
-                    Indent = true,
-                    OmitXmlDeclaration = false
+                    Indent = false,
+                    OmitXmlDeclaration = false,
+                    Encoding = Encoding.UTF8,
+                    DoNotEscapeUriAttributes = true
                 };
 
                 var ns = new XmlSerializerNamespaces();
+                ns.Add(string.Empty, string.Empty);
+                
 
                 // Generate memory stream
                 await using MemoryStream memoryStream = new();
-                using var streamWriter = XmlTextWriter.Create(memoryStream, settings);
-
+                using var streamWriter = XmlWriter.Create(memoryStream, settings);
+                streamWriter.WriteStartDocument(true);
+                
                 serializer.Serialize(streamWriter, obj, ns);
 
                 var file = memoryStream.ToArray();
 
                 var result = Encoding.UTF8.GetString(file);
 
-                Console.WriteLine(result);
+                Console.WriteLine(result.Replace("utf-8", "UTF-8"));
+                Console.WriteLine(" ");
 
-                return file;
+                return Encoding.UTF8.GetBytes(result.Replace("utf-8", "UTF-8"));
+
+                //return file;
             }
             catch(Exception ex)
             {

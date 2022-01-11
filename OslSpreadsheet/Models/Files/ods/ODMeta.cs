@@ -2,7 +2,7 @@
 
 namespace OslSpreadsheet.Models.Files.ods
 {
-    [XmlRoot("document-meta", ElementName = "document-meta", IsNullable = false)]
+    [XmlRoot("document-meta", ElementName = "document-meta", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0", IsNullable = false)]
     public class ODMeta
     {
         [XmlNamespaceDeclarations]
@@ -22,7 +22,7 @@ namespace OslSpreadsheet.Models.Files.ods
         [XmlAttribute(Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
         public string version { get; set; } = "1.3";
 
-        [XmlElement("meta", ElementName = "meta")]
+        [XmlElement("meta", ElementName = "meta", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
         public Meta meta { get; set; }
 
         public class Meta
@@ -37,16 +37,16 @@ namespace OslSpreadsheet.Models.Files.ods
                 _date = DateTime.Now;
             }
 
-            [XmlElement("generator", ElementName = "generator")]
+            [XmlElement("generator", ElementName = "generator", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
             public string Generator { get; set; } = _appName;
 
-            [XmlElement("initial-creator", ElementName = "initial-creator")]
-            public string InitialCreator { get; set; } = _appName;
+            //[XmlElement("initial-creator", ElementName = "initial-creator")]
+            //public string InitialCreator { get; set; } = _appName;
 
-            [XmlElement("creator", ElementName = "creator")]
+            [XmlElement("creator", ElementName = "creator", Namespace = "http://purl.org/dc/elements/1.1/")]
             public string Creator { get; set; } = _appName;
 
-            [XmlElement("creation-date", ElementName = "creation-date")]
+            [XmlElement("creation-date", ElementName = "creation-date", Namespace = "urn:oasis:names:tc:opendocument:xmlns:meta:1.0")]
             public string CreationDate 
             { 
                 get
@@ -66,7 +66,7 @@ namespace OslSpreadsheet.Models.Files.ods
                 }
             }
 
-            [XmlElement("date", ElementName = "date")]
+            [XmlElement("date", ElementName = "date", Namespace = "urn:oasis:names:tc:opendocument:xmlns:meta:1.0")]
             public string Date { get => _date.ToString("u").Replace(' ', 'T'); set { } }
         }
     }
