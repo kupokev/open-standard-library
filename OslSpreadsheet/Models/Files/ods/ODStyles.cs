@@ -207,12 +207,168 @@ namespace OslSpreadsheet.Models.Files.ods
 
         public class AutomaticStyles
         {
+            public AutomaticStyles()
+            {
+                pageLayout = new();
+            }
 
+            [XmlElement("page-layout", ElementName = "page-layout")]
+            public PageLayout pageLayout { get; set; }
+
+            public class PageLayout
+            {
+                public PageLayout()
+                {
+                    pageLayoutProperties = new();
+                    headerStyle = new();
+                    footerStyle = new();
+                }
+
+                [XmlAttribute("name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                public string Name { get; set; } = "pm1";
+
+                [XmlElement("page-layout-properties", ElementName = "page-layout-properties")]
+                public PageLayoutProperties pageLayoutProperties { get; set; }
+
+                [XmlElement("header-style", ElementName = "header-style")]
+                public HeaderStyle headerStyle { get; set; }
+
+                [XmlElement("footer-style", ElementName = "footer-style")]
+                public FooterStyle footerStyle { get; set; }
+
+                public class PageLayoutProperties
+                {
+                    [XmlAttribute("margin-top", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
+                    public string MarginTop { get; set; } = "0.3in";
+
+                    [XmlAttribute("margin-bottom", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
+                    public string MarginBottom { get; set; } = "0.3in";
+
+                    [XmlAttribute("margin-left", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
+                    public string MarginLeft { get; set; } = "0.7in";
+
+                    [XmlAttribute("margin-right", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
+                    public string MarginRight { get; set; } = "0.7in";
+
+                    [XmlAttribute("table-centering", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                    public string TableCentering { get; set; } = "none";
+
+                    [XmlAttribute("print", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                    public string Print { get; set; } = "objects charts drawings";
+                }
+
+                public class HeaderStyle
+                {
+                    public HeaderStyle()
+                    {
+                        headerFooterProperties = new HeaderFooterProperties()
+                        {
+                            MinHeight = "0.45in",
+                            MarginLeft = "0.7in",
+                            MarginRight = "0.7in",
+                            MarginBottom = "0in"
+                        };
+                    }
+
+                    [XmlElement("header-footer-properties", ElementName = "header-footer-properties")]
+                    public HeaderFooterProperties headerFooterProperties { get; set; }
+                }
+
+                public class FooterStyle
+                {
+                    public FooterStyle()
+                    {
+                        headerFooterProperties = new HeaderFooterProperties()
+                        {
+                            MinHeight = "0.45in",
+                            MarginLeft = "0.7in",
+                            MarginRight = "0.7in",
+                            MarginTop = "0in"
+                        };
+                    }
+
+                    [XmlElement("header-footer-properties", ElementName = "header-footer-properties")]
+                    public HeaderFooterProperties headerFooterProperties { get; set; }
+                }
+
+                public class HeaderFooterProperties
+                {
+                    [XmlAttribute("min-height", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
+                    public string? MinHeight { get; set; }
+
+                    [XmlAttribute("margin-left", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
+                    public string? MarginLeft { get; set; }
+
+                    [XmlAttribute("margin-right", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
+                    public string? MarginRight { get; set; }
+
+                    [XmlAttribute("margin-bottom", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
+                    public string? MarginBottom { get; set; }
+
+                    [XmlAttribute("margin-top", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
+                    public string? MarginTop { get; set; }
+                }
+            }
         }
 
         public class MasterStyles
         {
+            public MasterStyles()
+            {
+                masterPage = new();
+            }
 
+            [XmlElement("master-page", ElementName = "master-page")]
+            public MasterPage masterPage { get; set; }
+
+            public class MasterPage
+            {
+                public MasterPage()
+                {
+                    HeaderPageStyle = new();
+                    HeaderLeftPageStyle = new()
+                    {
+                        Display = "false"
+                    };
+                    HeaderFirstPageStyle = new();
+                    FooterPageStyle = new();
+                    FooterLeftPageStyle = new()
+                    {
+                        Display = "false"
+                    };
+                    FooterFirstPageStyle = new();
+                }
+
+                [XmlAttribute("name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                public string Name { get; set; } = "mp1";
+
+                [XmlAttribute("page-layout-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                public string PageLayoutName { get; set; } = "pm1";
+
+                [XmlElement("header", ElementName = "header")]
+                public PageStyle HeaderPageStyle { get; set; }
+
+                [XmlElement("header-left", ElementName = "header-left")]
+                public PageStyle HeaderLeftPageStyle { get; set; }
+
+                [XmlElement("header-first", ElementName = "header-first")]
+                public PageStyle HeaderFirstPageStyle { get; set; }
+
+                [XmlElement("footer", ElementName = "footer")]
+                public PageStyle FooterPageStyle { get; set; }
+
+                [XmlElement("footer-left", ElementName = "footer-left")]
+                public PageStyle FooterLeftPageStyle { get; set; }
+
+                [XmlElement("footer-first", ElementName = "footer-first")]
+                public PageStyle FooterFirstPageStyle { get; set; }
+
+                public class PageStyle
+                {
+                    [XmlAttribute("display", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                    public string? Display { get; set; }
+                }
+            }
         }
     }
 }
