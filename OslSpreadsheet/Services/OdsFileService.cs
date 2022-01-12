@@ -30,7 +30,7 @@ namespace OoxSpreadsheet.Services
                 {
                     new InMemoryFile()
                     {
-                        FileName = "META-INF/manifext.xml",
+                        FileName = "META-INF/manifest.xml",
                         Content = await XmlService.ConvertToXmlAsync(manifest)
                     },
                     new InMemoryFile()
@@ -51,7 +51,7 @@ namespace OoxSpreadsheet.Services
                     },
                     new InMemoryFile()
                     {
-                        FileName = "style.xml",
+                        FileName = "styles.xml",
                         Content = await XmlService.ConvertToXmlAsync(style)
                     }
                 };

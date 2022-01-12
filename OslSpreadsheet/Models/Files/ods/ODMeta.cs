@@ -2,7 +2,10 @@
 
 namespace OslSpreadsheet.Models.Files.ods
 {
-    [XmlRoot("document-meta", ElementName = "document-meta", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0", IsNullable = false)]
+    [System.SerializableAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
+    [XmlRoot("document-meta", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0", IsNullable = false)]
     public class ODMeta
     {
         [XmlNamespaceDeclarations]
@@ -19,8 +22,8 @@ namespace OslSpreadsheet.Models.Files.ods
             meta = new();
         }
 
-        [XmlAttribute(Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
-        public string version { get; set; } = "1.3";
+        [XmlAttribute(Form = System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public decimal version { get => 1.3M; set { } }
 
         [XmlElement("meta", ElementName = "meta", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
         public Meta meta { get; set; }

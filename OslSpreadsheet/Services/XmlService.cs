@@ -24,7 +24,6 @@ namespace OoxSpreadsheet.Services
 
                 var ns = new XmlSerializerNamespaces();
                 ns.Add(string.Empty, string.Empty);
-                
 
                 // Generate memory stream
                 await using MemoryStream memoryStream = new();
@@ -40,7 +39,7 @@ namespace OoxSpreadsheet.Services
                 Console.WriteLine(result.Replace("utf-8", "UTF-8"));
                 Console.WriteLine(" ");
 
-                return Encoding.UTF8.GetBytes(result.Replace("utf-8", "UTF-8"));
+                return Encoding.UTF8.GetBytes(result.Replace("utf-8", "UTF-8").Replace("\" />", "\"/>"));
 
                 //return file;
             }

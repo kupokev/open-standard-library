@@ -2,7 +2,10 @@
 
 namespace OslSpreadsheet.Models.Files.ods
 {
-    [XmlRoot("document-content", ElementName = "document-content", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0", IsNullable = false)]
+    [System.SerializableAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
+    [XmlRoot("document-content", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0", IsNullable = false)]
     public class ODContent
     {
         [XmlNamespaceDeclarations]
@@ -30,8 +33,8 @@ namespace OslSpreadsheet.Models.Files.ods
             _body = new();
         }
 
-        [XmlAttribute(Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
-        public string version { get; set; } = "1.3";
+        [XmlAttribute(Form = System.Xml.Schema.XmlSchemaForm.Qualified)]
+        public decimal version { get => 1.3M; set { } }
 
         [XmlElement("font-face-decls", ElementName = "font-face-decls", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
         public FontFaceDecals fontFaceDecals { get; set; }
@@ -42,6 +45,7 @@ namespace OslSpreadsheet.Models.Files.ods
         [XmlElement("body", ElementName = "body", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
         public Body body { get => _body; set { } }
 
+        [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
         public class FontFaceDecals
         {
             public FontFaceDecals()
@@ -52,9 +56,10 @@ namespace OslSpreadsheet.Models.Files.ods
             [XmlElement("font-face", ElementName = "font-face", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
             public List<FontFace> fontFace { get; set; }
 
+            [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
             public class FontFace
             {
-                [XmlAttribute("name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
+                [XmlAttribute("name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
                 public string Name { get; set; } = "Calibri";
 
                 [XmlAttribute("font-family", Namespace = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0")]
@@ -62,6 +67,7 @@ namespace OslSpreadsheet.Models.Files.ods
             }
         }
 
+        [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
         public class AutomaticStyles
         {
             public AutomaticStyles()
@@ -72,6 +78,7 @@ namespace OslSpreadsheet.Models.Files.ods
                     {
                         Name = "ce1",
                         Family = "table-cell",
+                        ParentStyleName = "Default",
                         DataStyleName = "N0"
                     },
                     new Style()
@@ -99,64 +106,69 @@ namespace OslSpreadsheet.Models.Files.ods
             [XmlElement("style", ElementName = "style", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
             public List<Style> automaticStyles { get; set; }
 
+            [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
             public class Style
             {
-                [XmlAttribute("name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
+                [XmlAttribute("name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
                 public string? Name { get; set; }
 
-                [XmlAttribute("family", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
+                [XmlAttribute("family", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
                 public string? Family { get; set; }
 
-                [XmlAttribute("parent-style-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
+                [XmlAttribute("parent-style-name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
                 public string? ParentStyleName { get; set; }
 
-                [XmlAttribute("data-style-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
+                [XmlAttribute("data-style-name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
                 public string? DataStyleName { get; set; }
 
-                [XmlAttribute("master-page-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
+                [XmlAttribute("master-page-name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
                 public string? MasterPageName { get; set; }
 
                 [XmlElement("table-column-properties", ElementName = "table-column-properties")]
-                public TableColumnProperties tableColumnProperties { get; set; }
+                public TableColumnProperties? tableColumnProperties { get; set; }
 
                 [XmlElement("table-row-properties", ElementName = "table-row-properties")]
-                public TableRowProperties tableRowProperties { get; set; }
+                public TableRowProperties? tableRowProperties { get; set; }
 
                 [XmlElement("table-properties", ElementName = "table-properties")]
-                public TableProperties tableProperties { get; set; }
+                public TableProperties? tableProperties { get; set; }
 
+                [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
                 public class TableColumnProperties
                 {
                     [XmlAttribute("break-before", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
                     public string BreakBefore { get; set; } = "auto";
 
-                    [XmlAttribute("column-width", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                    [XmlAttribute("column-width", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
                     public string? ColumnWidth { get; set; } = "1.69333333333333cm";
                 }
 
+                [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
                 public class TableRowProperties
                 {
-                    [XmlAttribute("row-height", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                    [XmlAttribute("row-height", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
                     public string? RowHeight { get; set; } = "15pt";
 
-                    [XmlAttribute("use-optimal-row-height", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                    [XmlAttribute("use-optimal-row-height", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
                     public string? UseOptimalRowHeight { get; set; } = "true";
 
                     [XmlAttribute("break-before", Namespace = "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0")] // namespace:fo
                     public string BreakBefore { get; set; } = "auto";
                 }
 
+                [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
                 public class TableProperties
                 {
-                    [XmlAttribute("display", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                    [XmlAttribute("display", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                     public string? Display { get; set; } = "true";
 
-                    [XmlAttribute("writing-mode", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
+                    [XmlAttribute("writing-mode", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
                     public string? WritingMode { get; set; } = "lr-tb";
                 }
             }
         }
 
+        [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
         public class Body
         {
             public Body()
@@ -167,6 +179,7 @@ namespace OslSpreadsheet.Models.Files.ods
             [XmlElement("spreadsheet", ElementName = "spreadsheet", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")]
             public Spreadsheet spreadsheet { get; set; }
 
+            [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
             public class Spreadsheet
             {
                 public Spreadsheet()
@@ -187,27 +200,28 @@ namespace OslSpreadsheet.Models.Files.ods
                 [XmlElement("table", ElementName = "table", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
                 public List<Table> Tables { get; set; }
 
-
+                [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
                 public class CalculationSettings
                 {
-                    [XmlAttribute("case-sensitive", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                    [XmlAttribute("case-sensitive", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                     public string? CaseSensitive { get; set; } = "true";
 
-                    [XmlAttribute("search-criteria-must-apply-to-whole-cell", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                    [XmlAttribute("search-criteria-must-apply-to-whole-cell", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                     public string? SearchCriteriaMustApplyToWholeCell { get; set; } = "true";
 
-                    [XmlAttribute("use-wildcards", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                    [XmlAttribute("use-wildcards", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                     public string? UseWildcards { get; set; } = "false";
 
-                    [XmlAttribute("use-regular-expressions", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                    [XmlAttribute("use-regular-expressions", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                     public string? UseRegulareExpressions { get; set; } = "false";
 
-                    [XmlAttribute("automatic-find-labels", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                    [XmlAttribute("automatic-find-labels", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                     public string? AutomaticFindLabels { get; set; } = "false";
                 }
             }
         }
 
+        [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
         public class Table
         {
             private readonly int _maxColumns;
@@ -241,10 +255,10 @@ namespace OslSpreadsheet.Models.Files.ods
                 };
             }
 
-            [XmlAttribute("name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+            [XmlAttribute("name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
             public string Name { get; set; }
 
-            [XmlAttribute("style-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+            [XmlAttribute("style-name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
             public string StyleName { get; set; } = "ta1";
 
             [XmlElement("table-column", ElementName = "table-column", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
@@ -253,18 +267,20 @@ namespace OslSpreadsheet.Models.Files.ods
             [XmlElement("table-row", ElementName = "table-row", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
             public List<TableRow> Rows { get => _rows; set { } }
 
+            [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
             public class TableColumn
             {
-                [XmlAttribute("style-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                [XmlAttribute("style-name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                 public string StyleName { get; set; } = "co1";
 
-                [XmlAttribute("number-columns-repeated", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                [XmlAttribute("number-columns-repeated", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                 public string NumberColumnsRepeated { get; set; } = "";
 
-                [XmlAttribute("default-cell-style-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                [XmlAttribute("default-cell-style-name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                 public string DefaultCellStyleName { get; set; } = "ce1";
             }
 
+            [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
             public class TableRow
             {
                 public TableRow()
@@ -275,24 +291,25 @@ namespace OslSpreadsheet.Models.Files.ods
                 [XmlIgnore]
                 public int RowIndex { get; set; }
 
-                [XmlAttribute("number-rows-repeated", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                [XmlAttribute("number-rows-repeated", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                 public string? NumberRowsRepeated { get; set; }
 
-                [XmlAttribute("style-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                [XmlAttribute("style-name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                 public string StyleName { get; set; } = "ro1";
 
                 [XmlElement("table-cell", ElementName = "table-cell", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
                 public List<TableCell> Cells { get; set; }
 
+                [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
                 public class TableCell
                 {
-                    [XmlAttribute("value-type", Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")] // namespace:office
+                    [XmlAttribute("value-type", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0")] // namespace:office
                     public string? ValueType { get; set; } = "string";
 
-                    [XmlAttribute("number-columns-repeated", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                    [XmlAttribute("number-columns-repeated", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                     public string? NumberColumnsRepeated { get; set; }
 
-                    [XmlAttribute("style-name", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
+                    [XmlAttribute("style-name", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
                     public string? StyleName { get; set; } = "ce1";
                 }
             }
