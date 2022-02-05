@@ -2,8 +2,8 @@
 
 Open Standard Library is a library to read and create open standard documents. The main file formats that will be supported are: 
 
-| | File Type | Generator | Importer |
-|--|--|--|
+| # | File Type | Generator | Importer |
+| --- | --- | --- | --- |
 | 1 | Comma Delimited (csv) | Done | Not Started |
 | 2 | Open Document Standard (ods) | Started | Not Started |
 | 3 | Open Office XML (xlsx) | Started | Not Started |
