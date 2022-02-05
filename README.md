@@ -2,12 +2,13 @@
 
 Open Standard Library is a library to read and create open standard documents. The main file formats that will be supported are: 
 
-1. Comma Delimited (csv)
-2. Open Document Standard (ods) (Currently working on)
-3. Open Office XML (xlsx)
-4. Tab Delimited (txt)
+| | File Type | Generator | Importer |
+|--|--|--|
+| 1 | Comma Delimited (csv) | Done | Not Started |
+| 2 | Open Document Standard (ods) | Started | Not Started |
+| 3 | Open Office XML (xlsx) | Started | Not Started |
+| 4 | Tab Delimited (txt) | Not Started | Not Started |
 
-There will be examples on how to work with this library as more functionality is built out.
 
 ## Using the Library
 
