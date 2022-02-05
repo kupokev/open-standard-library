@@ -127,10 +127,10 @@ namespace OslSpreadsheet.Models.Files.ods
                 [XmlElement("table-column-properties", ElementName = "table-column-properties")]
                 public TableColumnProperties? tableColumnProperties { get; set; }
 
-                [XmlElement("table-row-properties", ElementName = "table-row-properties")]
+                [XmlElement("table-row-properties", ElementName = "table-row-properties", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
                 public TableRowProperties? tableRowProperties { get; set; }
 
-                [XmlElement("table-properties", ElementName = "table-properties")]
+                [XmlElement("table-properties", ElementName = "table-properties", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
                 public TableProperties? tableProperties { get; set; }
 
                 [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
@@ -143,7 +143,7 @@ namespace OslSpreadsheet.Models.Files.ods
                     public string? ColumnWidth { get; set; } = "1.69333333333333cm";
                 }
 
-                [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
+                [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
                 public class TableRowProperties
                 {
                     [XmlAttribute("row-height", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
@@ -156,7 +156,7 @@ namespace OslSpreadsheet.Models.Files.ods
                     public string BreakBefore { get; set; } = "auto";
                 }
 
-                [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
+                [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")] // namespace:style
                 public class TableProperties
                 {
                     [XmlAttribute("display", Form = System.Xml.Schema.XmlSchemaForm.Qualified, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")] // namespace:table
