@@ -95,7 +95,34 @@ namespace OoxSpreadsheet.Services
 
         private ODStyles GenerateStyleFile(oWorkbook workbook)
         {
-            return new ODStyles();
+            var file = new ODStyles();
+
+            foreach (var s in workbook.Sheets)
+            {
+                var masterPageName = String.Format("mp{0}", s.Index);
+                var pageLayoutName = String.Format("pm{0}", s.Index);
+
+                file.automaticStyles.pageLayout.Add(new ODStyles.AutomaticStyles.PageLayout()
+                {
+                    Name = pageLayoutName
+                });
+
+                file.masterStyles.masterPage.Add(new ODStyles.MasterStyles.MasterPage()
+                {
+                    FooterLeftPageStyle = new ODStyles.MasterStyles.MasterPage.PageStyle()
+                    {
+                        Display = "false"
+                    },
+                    HeaderLeftPageStyle = new ODStyles.MasterStyles.MasterPage.PageStyle()
+                    {
+                        Display = "false"
+                    },
+                    Name = masterPageName,
+                    PageLayoutName = pageLayoutName
+                });
+            }
+
+            return file;
         }
 
         protected virtual void Dispose(bool disposing)

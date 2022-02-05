@@ -226,7 +226,7 @@ namespace OslSpreadsheet.Models.Files.ods
             }
 
             [XmlElement("page-layout", ElementName = "page-layout", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
-            public PageLayout pageLayout { get; set; }
+            public List<PageLayout> pageLayout { get; set; }
 
             [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
             public class PageLayout
@@ -338,7 +338,7 @@ namespace OslSpreadsheet.Models.Files.ods
             }
 
             [XmlElement("master-page", ElementName = "master-page", Namespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0")]
-            public MasterPage masterPage { get; set; }
+            public List<MasterPage> masterPage { get; set; }
 
             [XmlType(AnonymousType = true, Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]
             public class MasterPage
