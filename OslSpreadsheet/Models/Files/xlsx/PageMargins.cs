@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace OoxSpreadsheet.Models.Files.xlsx
+namespace OslSpreadsheet.Models.Files.xlsx
 {
     [XmlType(TypeName = "pageMargins")]
     public class PageMargins

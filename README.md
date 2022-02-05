@@ -9,7 +9,46 @@ Open Standard Library is a library to read and create open standard documents. T
 
 There will be examples on how to work with this library as more functionality is built out.
 
-## Open Document Standard
+## Using the Library
+
+This library uses a Workbook model created in the Spreadsheet service that is implemented through the interface ISpreadsheet. 
+
+```
+await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
+{
+    var workbook = spreadsheet.Workbook;
+
+    ...
+}
+```
+
+Once the Workbook model has been populated, the library can convert this model to different file types. The following sections show examples of how to use each one. 
+
+### Create CSV File
+
+Coverting a CSV file to a Workbook has not been implemented at this time.
+
+Converting a Workbook to a CSV file is fully implemented. To convert a Workbook to a CSV file, use the following example.
+
+```
+await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
+    {
+        var workbook = spreadsheet.Workbook;
+
+        var sheet1 = await workbook.AddSheetAsync();
+
+        sheet1.AddCell(1, 1, "Item #");
+        sheet1.AddCell(1, 2, "Price");
+        sheet1.AddCell(2, 1, "5\" Fitting");
+        sheet1.AddCell(2, 2, "10.20", CellValueType.Float);
+
+        // Convert spreadsheet to compressed file (XLSX)
+        var csvFile = await spreadsheet.GenerateCsvFileAsync();
+
+        // Save compressed file
+        await File.WriteAllBytesAsync(@"C:\Temp\New File.csv", csvFile);
+    }
+```
 
 ### Create ODS File
 
@@ -20,6 +59,9 @@ await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
 {
     // Create new workbook
     var workbook = spreadsheet.Workbook;
+
+    // Add creator
+    workbook.Creator = "Kevin Williams";
 
     // Create worksheets
     var sheet1 = await workbook.AddSheetAsync();

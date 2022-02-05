@@ -1,9 +1,8 @@
-﻿using OoxSpreadsheet.Models.Files.xlsx;
-using OslSpreadsheet.Models;
-using OslSpreadsheet.Services;
+﻿using OslSpreadsheet.Models;
+using OslSpreadsheet.Models.Files.xlsx;
 using System.IO.Compression;
 
-namespace OoxSpreadsheet.Services
+namespace OslSpreadsheet.Services
 {
     internal class XlsxFileService : IFileService
     {
@@ -21,7 +20,7 @@ namespace OoxSpreadsheet.Services
             try
             {
                 // TODO: need to convert oWorkbook to ooxWorkbook
-                OXWorkbook wb = new(); 
+                OXWorkbook wb = new();
 
                 var types = new OXContentTypes(wb);
 
@@ -51,7 +50,7 @@ namespace OoxSpreadsheet.Services
                     files.Add(new InMemoryFile()
                     {
                         FileName = file.TrimStart('/'),
-                        Content = (o == null) ? new byte[0] : await XmlService.ConvertToXmlAsync(o)
+                        Content = o == null ? new byte[0] : await XmlService.ConvertToXmlAsync(o)
                     });
                 }
 

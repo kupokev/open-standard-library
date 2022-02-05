@@ -2,7 +2,7 @@
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace OoxSpreadsheet.Services
+namespace OslSpreadsheet.Services
 {
     internal static class XmlService
     {
@@ -29,7 +29,7 @@ namespace OoxSpreadsheet.Services
                 await using MemoryStream memoryStream = new();
                 using var streamWriter = XmlWriter.Create(memoryStream, settings);
                 streamWriter.WriteStartDocument(true);
-                
+
                 serializer.Serialize(streamWriter, obj, ns);
 
                 var file = memoryStream.ToArray();
@@ -43,7 +43,7 @@ namespace OoxSpreadsheet.Services
 
                 //return file;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new byte[0];
             }
@@ -51,7 +51,7 @@ namespace OoxSpreadsheet.Services
 
         internal static async Task<object> ConvertToObject<T>(string xml)
         {
-            T retval = default(T);
+            T retval = default;
 
             using (var reader = new StringReader(xml))
             {

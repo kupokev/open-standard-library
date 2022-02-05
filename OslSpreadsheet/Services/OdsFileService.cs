@@ -1,9 +1,8 @@
 ﻿using OslSpreadsheet.Models;
 using OslSpreadsheet.Models.Files.ods;
-using OslSpreadsheet.Services;
 using System.Text;
 
-namespace OoxSpreadsheet.Services
+namespace OslSpreadsheet.Services
 {
     internal class OdsFileService : IFileService
     {
@@ -75,8 +74,8 @@ namespace OoxSpreadsheet.Services
 
             foreach (var s in workbook.Sheets)
             {
-                var masterPageName = String.Format("mp{0}", s.Index);
-                var styleName = String.Format("ta{0}", s.Index);
+                var masterPageName = string.Format("mp{0}", s.Index);
+                var styleName = string.Format("ta{0}", s.Index);
 
                 file.automaticStyles.automaticStyles.Add(new ODContent.AutomaticStyles.Style()
                 {
@@ -121,8 +120,8 @@ namespace OoxSpreadsheet.Services
 
             foreach (var s in workbook.Sheets)
             {
-                var masterPageName = String.Format("mp{0}", s.Index);
-                var pageLayoutName = String.Format("pm{0}", s.Index);
+                var masterPageName = string.Format("mp{0}", s.Index);
+                var pageLayoutName = string.Format("pm{0}", s.Index);
 
                 file.automaticStyles.pageLayout.Add(new ODStyles.AutomaticStyles.PageLayout()
                 {

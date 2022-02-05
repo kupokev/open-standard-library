@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace OoxSpreadsheet.Models.Files.xlsx
+namespace OslSpreadsheet.Models.Files.xlsx
 {
     [XmlRoot("Types", ElementName = "Types", Namespace = "http://schemas.openxmlformats.org/package/2006/content-types", IsNullable = false)]
     public class OXContentTypes
