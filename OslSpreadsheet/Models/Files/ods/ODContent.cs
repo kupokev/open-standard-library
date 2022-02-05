@@ -92,13 +92,6 @@ namespace OslSpreadsheet.Models.Files.ods
                         Name = "ro1",
                         Family = "table-row",
                         tableRowProperties = new ()
-                    },
-                    new Style()
-                    {
-                        Name = "ta1",
-                        Family = "table",
-                        MasterPageName = "mp1",
-                        tableProperties = new ()
                     }
                 };
             }
@@ -186,12 +179,6 @@ namespace OslSpreadsheet.Models.Files.ods
                 {
                     calculationSettings = new();
                     Tables = new();
-
-                    // For testing only
-                    Tables.Add(new()
-                    {
-                        Name = "Sheet1"
-                    });
                 }
 
                 [XmlElement("calculation-settings", ElementName = "calculation-settings", Namespace = "urn:oasis:names:tc:opendocument:xmlns:table:1.0")]

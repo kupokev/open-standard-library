@@ -71,7 +71,29 @@ namespace OoxSpreadsheet.Services
 
         private ODContent GenerateContentFile(oWorkbook workbook)
         {
-            return new ODContent();
+            var file = new ODContent();
+
+            foreach (var s in workbook.Sheets)
+            {
+                var masterPageName = String.Format("mp{0}", s.Index);
+                var styleName = String.Format("ta{0}", s.Index);
+
+                file.automaticStyles.automaticStyles.Add(new ODContent.AutomaticStyles.Style()
+                {
+                    Name = styleName,
+                    Family = "table",
+                    MasterPageName = masterPageName,
+                    tableProperties = new()
+                });
+
+                file.body.spreadsheet.Tables.Add(new ODContent.Table()
+                {
+                    Name = s.SheetName,
+                    StyleName = styleName
+                });
+            }
+
+            return file;
         }
 
         /// <summary>
