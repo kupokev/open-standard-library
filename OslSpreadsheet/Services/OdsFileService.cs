@@ -19,11 +19,10 @@ namespace OoxSpreadsheet.Services
             byte[] output;
 
             try
-            {             
-                ODManifest manifest = new();
-                ODContent content = new();
-                ODMeta meta = new();
-                ODStyles style = new();
+            {
+                var content = GenerateContentFile(workbook);
+                var meta = GenerateMetaFile(workbook);
+                var style = GenerateStyleFile(workbook);
 
                 // Add models to a file list for compression
                 List<InMemoryFile> files = new()
@@ -31,7 +30,7 @@ namespace OoxSpreadsheet.Services
                     new InMemoryFile()
                     {
                         FileName = "META-INF/manifest.xml",
-                        Content = await XmlService.ConvertToXmlAsync(manifest)
+                        Content = await XmlService.ConvertToXmlAsync(new ODManifest())
                     },
                     new InMemoryFile()
                     {
@@ -46,7 +45,6 @@ namespace OoxSpreadsheet.Services
                     new InMemoryFile()
                     {
                         FileName = "mimetype",
-                        //Content = await XmlService.ConvertToXmlAsync(mimeType)
                         Content = Encoding.ASCII.GetBytes("application/vnd.oasis.opendocument.spreadsheet")
                     },
                     new InMemoryFile()
@@ -69,6 +67,35 @@ namespace OoxSpreadsheet.Services
         public async Task<oWorkbook> GenerateModel(byte[] file)
         {
             throw new NotImplementedException();
+        }
+
+        private ODContent GenerateContentFile(oWorkbook workbook)
+        {
+            return new ODContent();
+        }
+
+        /// <summary>
+        /// Generates meta.xml file found in the root of the ODS zip file
+        /// </summary>
+        /// <param name="workbook"></param>
+        /// <returns></returns>
+        private ODMeta GenerateMetaFile(oWorkbook workbook)
+        {
+            return new ODMeta()
+            {
+                meta = new ODMeta.Meta()
+                {
+                    CreationDate = workbook.CreationDate,
+                    Creator = workbook.Creator,
+                    Date = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ssZ"),
+                    Generator = workbook.Generator
+                }
+            };
+        }
+
+        private ODStyles GenerateStyleFile(oWorkbook workbook)
+        {
+            return new ODStyles();
         }
 
         protected virtual void Dispose(bool disposing)

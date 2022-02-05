@@ -21,6 +21,8 @@ await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
 {
     var workbook = spreadsheet.Workbook;
 
+    workbook.Creator = "Kevin Williams";
+
     var sheet1 = await workbook.AddSheetAsync();
     var sheet2 = await workbook.AddSheetAsync("Stuff");
 
@@ -36,7 +38,7 @@ await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
     var odsFile = await spreadsheet.GenerateOdsFileAsync();
 
     // Save compressed file
-    await File.WriteAllBytesAsync(@"C:\Temp\New File (ODS).zip", odsFile);
+    await File.WriteAllBytesAsync(@"C:\Temp\New File.ods", odsFile);
 
     // Convert spreadsheet to compressed file (XLSX)
     //var xlsxFile = await spreadsheet.GenerateXlsxFileAsync();
