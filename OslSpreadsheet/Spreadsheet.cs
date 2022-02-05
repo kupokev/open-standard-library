@@ -1,11 +1,13 @@
-﻿using OoxSpreadsheet.Services;
-using OslSpreadsheet.Models;
+﻿using OslSpreadsheet.Models;
+using OslSpreadsheet.Services;
 
 namespace OoxSpreadsheet
 {
     public interface ISpreadsheet : IDisposable, IAsyncDisposable
     {
         oWorkbook Workbook { get; }
+
+        Task<byte[]> GenerateCsvFileAsync();
 
         Task<byte[]> GenerateOdsFileAsync();
 
@@ -14,15 +16,22 @@ namespace OoxSpreadsheet
 
     public class Spreadsheet : ISpreadsheet
     {
-        private readonly OslSpreadsheet.Models.oWorkbook _workbook;
+        private readonly oWorkbook _workbook;
 
         public Spreadsheet()
         {
-            _workbook = new OslSpreadsheet.Models.oWorkbook();
+            _workbook = new oWorkbook();
         }
         
-        public OslSpreadsheet.Models.oWorkbook Workbook  { get => _workbook; }
+        public oWorkbook Workbook  { get => _workbook; }
 
+
+        public async Task<byte[]> GenerateCsvFileAsync()
+        {
+            IFileService _fileService = new CsvFileService();
+
+            return await _fileService.GenerateFileAsync(Workbook);
+        }
 
         public async Task<byte[]> GenerateOdsFileAsync()
         {

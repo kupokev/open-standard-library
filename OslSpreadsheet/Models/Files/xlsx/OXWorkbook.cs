@@ -1,7 +1,7 @@
 ﻿using System.Xml;
 using System.Xml.Serialization;
 
-namespace OoxSpreadsheet.Models.Files.xlsx
+namespace OslSpreadsheet.Models.Files.xlsx
 {
     [XmlRoot("workbook", ElementName = "workbook", Namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main")]
     public class OXWorkbook

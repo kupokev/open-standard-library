@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace OoxSpreadsheet.Models.Files.xlsx
+namespace OslSpreadsheet.Models.Files.xlsx
 {
     [XmlType(TypeName = "sheetView", Namespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main")]
     public class SheetView

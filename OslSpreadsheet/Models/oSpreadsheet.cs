@@ -26,9 +26,36 @@
             return _AddCell(new oCell(row, column));
         }
 
+        public oCell AddCell(int row, int column, string value)
+        {
+            return _AddCell(new oCell(row, column)
+            {
+                Value = value
+            });
+        }
+
+        public oCell AddCell(int row, int column, string value, CellValueType valueType)
+        {
+            return _AddCell(new oCell(row, column)
+            {
+                Value = value,
+                ValueType = valueType
+            });
+        }
+
         public async Task<oCell> AddCellAsync(int row, int column)
         {
-            return await Task.Run(() => _AddCell(new oCell(row, column)));
+            return await Task.Run(() => AddCell(row, column));
+        }
+
+        public async Task<oCell> AddCellAsync(int row, int column, string value)
+        {
+            return await Task.Run(() => AddCell(row, column, value));
+        }
+
+        public async Task<oCell> AddCellAsync(int row, int column, string value, CellValueType valueType)
+        {
+            return await Task.Run(() => AddCell(row, column, value, valueType));
         }
 
         private oCell _AddCell(oCell cell)

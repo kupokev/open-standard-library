@@ -1,6 +1,6 @@
 ﻿using OslSpreadsheet.Models;
 
-namespace OoxSpreadsheet.Services
+namespace OslSpreadsheet.Services
 {
     internal interface IFileService : IDisposable, IAsyncDisposable
     {
