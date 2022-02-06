@@ -1,10 +1,12 @@
 # Open Standard Library
 
-Open Standard Library is a library to read and create open standard documents. The main file formats that will be supported are: 
+Open Standard Library is a library to read and create open standard documents as well as other common spreadsheet formats such as comma and tab delimited files. 
+
+The following file types are either supported or are planning support. 
 
 | # | File Type | Generator | Importer |
 | --- | --- | --- | --- |
-| 1 | Comma Delimited (csv) | Done | Not Started |
+| 1 | Comma Delimited (csv) | Done | Done |
 | 2 | Open Document Standard (ods) | Started | Not Started |
 | 3 | Open Office XML (xlsx) | Started | Not Started |
 | 4 | Tab Delimited (txt) | Not Started | Not Started |

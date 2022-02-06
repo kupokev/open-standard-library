@@ -20,7 +20,9 @@ using IHost host = Host.CreateDefaultBuilder(args)
 // Generate spreadsheet
 //await TestOds();
 
-await TestCsv();
+await TestGenerateCsv();
+
+await TestImportCsv();
 
 
 // Run the application
@@ -41,7 +43,7 @@ await host.RunAsync();
 
 //    var obj = await XmlService.ConvertToObject<ODMeta>(xml);
 //}
-async Task TestCsv()
+async Task TestGenerateCsv()
 {
     await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
     {
@@ -64,7 +66,19 @@ async Task TestCsv()
     }
 }
 
-async Task TestOds()
+async Task TestImportCsv()
+{
+    await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
+    {
+        var file = File.ReadAllBytes(@"C:\Temp\New File.csv");
+
+        var workbook = await spreadsheet.ImportCsvFileAsync(file);
+
+        var foo = workbook.Sheets.First().ToArray();
+    }
+}
+
+async Task TestGenerateOds()
 {
     await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
     {
@@ -91,7 +105,7 @@ async Task TestOds()
     }
 }
 
-async Task TestXlsx()
+async Task TestGenerateXlsx()
 {
     await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
     {
