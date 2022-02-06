@@ -59,9 +59,52 @@ namespace OslSpreadsheet.Services
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public Task<oWorkbook> GenerateModel(byte[] file)
+        public async Task<oWorkbook> GenerateModel(byte[] file)
         {
-            throw new NotImplementedException();
+            // Create new workbook
+            oWorkbook workbook = new();
+
+            // Add sheet to workbook
+            var sheet1 = await workbook.AddSheetAsync();
+
+            try
+            {
+                // Check 
+                if (file == null || file.Length == 0) throw new ArgumentNullException("File is empty");
+
+                // Convert file to string and replace line endings with Environment.NewLine
+                var contents = Encoding.UTF8.GetString(file).ReplaceLineEndings(Environment.NewLine);
+
+                // Split the contents into multiple rows
+                var lines = contents.Split(Environment.NewLine).ToList();
+
+                // Remove blank lines
+                lines.Remove("");
+
+                for (int r = 0; r < lines.Count(); r++)
+                {
+                    // Split the line to columns
+                    var cols = lines[r].Replace("\", \"", "\",\"").Replace("\" ,\"", "\",\"").Split("\",\"");
+
+                    // Remove the first double-quote
+                    cols[0] = cols[0].Remove(0, 1);
+
+                    // Remove end quote for the last element
+                    cols[cols.Count() - 1] = cols[cols.Count() - 1].Remove(cols[cols.Count() - 1].Length - 1, 1);
+
+                    // Cycle through the columns and add to list
+                    for (int c = 0; c < cols.Count(); c++)
+                    {
+                        sheet1.AddCell(r + 1, c + 1, cols[c]);
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+
+            return workbook;
         }
 
         public void Dispose()
