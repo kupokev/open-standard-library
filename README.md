@@ -27,31 +27,76 @@ await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
 
 Once the Workbook model has been populated, the library can convert this model to different file types. The following sections show examples of how to use each one. 
 
-### Create CSV File
-
-Coverting a CSV file to a Workbook has not been implemented at this time.
-
-Converting a Workbook to a CSV file is fully implemented. To convert a Workbook to a CSV file, use the following example.
+Workbooks can also be turned into a 2D array using the following code. 
 
 ```
 await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
-    {
-        var workbook = spreadsheet.Workbook;
+{
+    var workbook = spreadsheet.Workbook;
 
-        var sheet1 = await workbook.AddSheetAsync();
-
-        sheet1.AddCell(1, 1, "Item #");
-        sheet1.AddCell(1, 2, "Price");
-        sheet1.AddCell(2, 1, "5\" Fitting");
-        sheet1.AddCell(2, 2, "10.20", CellValueType.Float);
-
-        // Convert spreadsheet to compressed file (XLSX)
-        var csvFile = await spreadsheet.GenerateCsvFileAsync();
-
-        // Save compressed file
-        await File.WriteAllBytesAsync(@"C:\Temp\New File.csv", csvFile);
-    }
+    // Converts the first sheet to a 2D array
+    var sheet1 = workbook.Sheets.First().ToArray();
+}
 ```
+
+### Create CSV File
+
+To convert a Workbook to a CSV file, use the following example.
+
+```
+await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
+{
+    var workbook = spreadsheet.Workbook;
+
+    var sheet1 = await workbook.AddSheetAsync();
+
+    sheet1.AddCell(1, 1, "Item #");
+    sheet1.AddCell(1, 2, "Price");
+    sheet1.AddCell(2, 1, "5\" Fitting");
+    sheet1.AddCell(2, 2, "10.20", CellValueType.Float);
+
+    // Convert spreadsheet to compressed file (XLSX)
+    var csvFile = await spreadsheet.GenerateCsvFileAsync();
+
+    // Save compressed file
+    await File.WriteAllBytesAsync(@"C:\Temp\New File.csv", csvFile);
+}
+```
+
+When converting to a CSV file, the values will be wrapped in double-quotes and separated by commas. Additionally, double-quotes inside a column's text will be properly esacped. 
+
+The code above generates the following output. 
+
+```
+"Item #","Price"
+"5"" Fitting","10.20"
+```
+
+### Import CSV File
+
+To import a CSV file into a workbook, the CSV must be in a valid format. The following text is an example of properly formatted text.
+
+```
+"Item #","Price"
+"5"" Fitting","10.20"
+```
+
+To import a CSV file into a workbook, use the following code.
+
+```
+async Task TestImportCsv()
+{
+    await using (var spreadsheet = host.Services.GetService<ISpreadsheet>())
+    {
+        var file = File.ReadAllBytes(@"C:\Temp\New File.csv");
+
+        var workbook = await spreadsheet.ImportCsvFileAsync(file);
+
+        // Code to work with the workbook
+    }
+}
+```
+
 
 ### Create ODS File
 
