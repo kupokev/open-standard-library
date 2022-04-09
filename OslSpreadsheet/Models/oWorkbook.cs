@@ -23,6 +23,8 @@
 
         public string CreationDate { get; set; } = "";
 
+        public ColumnDelimeter ColumnDelimeter { get; set; } = ColumnDelimeter.Comma;
+
         public List<oSpreadsheet> Sheets { get; set; }
 
         public oSpreadsheet AddSheet()

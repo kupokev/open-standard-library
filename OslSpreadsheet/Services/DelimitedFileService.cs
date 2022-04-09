@@ -3,21 +3,35 @@ using System.Text;
 
 namespace OslSpreadsheet.Services
 {
-    internal class CsvFileService : IFileService
+    internal class DelimitedFileService : IFileService
     {
         /// <summary>
-        /// Converts an oWorkbook object to a CSV file byte array.
+        /// Converts an oWorkbook object to a delimited file byte array.
         /// </summary>
         /// <param name="workbook"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         public Task<byte[]> GenerateFileAsync(oWorkbook workbook)
         {
-            if (workbook.Sheets.Count == 0) throw new ArgumentException("Workbook requires at least 1 sheet to convert to CSV");
+            if (workbook.Sheets.Count == 0) throw new ArgumentException("Workbook requires at least 1 sheet to convert to a delimited file.");
 
             byte[] output;
 
             string result = "";
+
+            // Wrap values in double quotes for comma delimited files
+            char? valueWrap = workbook.ColumnDelimeter == ColumnDelimeter.Comma ? '\"' : null;
+
+            // Column Delimiter
+            string colDelimiter =
+                string.Concat(
+                    valueWrap,
+                    GetColumnDelimiter(workbook.ColumnDelimeter),
+                    valueWrap
+                    );
+
+            // Newline Delimiter
+            string nlDelimiter = GetRowDelimiter(workbook.ColumnDelimeter);
 
             var cols = workbook.Sheets[0].Cells.Max(x => x.Column);
             var rows = workbook.Sheets[0].Cells.Max(x => x.Row);
@@ -32,26 +46,70 @@ namespace OslSpreadsheet.Services
                 for (int c = 1; c <= cols; c++)
                 {
                     string value = cells.FirstOrDefault(x => x.Row == r && x.Column == c)?.Value ?? "";
-                    values.Add(ParseValue(value));
+                    values.Add(ParseValue(value, valueWrap));
                 }
-
-                result += "\"" + string.Join("\",\"", values) + "\"" + Environment.NewLine;
+                     
+                // Convert the row into delimited string
+                result += string.Concat(
+                    valueWrap,
+                    string.Join(colDelimiter, values),
+                    valueWrap,
+                    nlDelimiter
+                    );
             }
 
-            output = Encoding.UTF8.GetBytes(result);
+            if(workbook.ColumnDelimeter == ColumnDelimeter.ASCII)
+                output = Encoding.ASCII.GetBytes(result);
+            else
+                output = Encoding.UTF8.GetBytes(result);
 
             return Task.FromResult(output);
         }
-         
+
+        private char GetColumnDelimiter(ColumnDelimeter delimeter)
+        {
+            switch(delimeter)
+            {
+                case ColumnDelimeter.ASCII:
+                    //return Convert.ToChar(31).ToString();
+                    return  '\u001F';
+                default:
+                case ColumnDelimeter.Comma:
+                    return ',';
+                case ColumnDelimeter.Pipe:
+                    return '|';
+                case ColumnDelimeter.Tab:
+                    return '\t';
+            }
+        }
+
+        private string GetRowDelimiter(ColumnDelimeter delimeter)
+        {
+            switch (delimeter)
+            {
+                case ColumnDelimeter.ASCII:
+                    return "\u001E";
+                default:
+                case ColumnDelimeter.Comma:
+                case ColumnDelimeter.Pipe:
+                case ColumnDelimeter.Tab:
+                    return Environment.NewLine;
+            }
+        }
+
         /// <summary>
         /// Manipulates values of a cell to proper values that can be stored in CSV
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        private string ParseValue(string value)
+        private string ParseValue(string value, char? valueWrap)
         {
-            // Double quotes in CSV are escaped by adding another double quote in front of it according to RFC-4180
-            return value.Replace("\"", "\"\"");
+            if (valueWrap == null || valueWrap != '\"')
+                // Just return the value if valueWrap is empty
+                return value;
+            else
+                // Double quotes in CSV are escaped by adding another double quote in front of it according to RFC-4180
+                return value.Replace("\"", "\"\"");
         }
 
         /// <summary>
