@@ -30,7 +30,7 @@ namespace OoxSpreadsheet
 
         public async Task<byte[]> GenerateCsvFileAsync()
         {
-            IFileService _fileService = new CsvFileService();
+            IFileService _fileService = new DelimitedFileService();
 
             return await _fileService.GenerateFileAsync(Workbook);
         }
@@ -51,7 +51,7 @@ namespace OoxSpreadsheet
 
         public async Task<oWorkbook> ImportCsvFileAsync(byte[] file)
         {
-            IFileService _fileService = new CsvFileService();
+            IFileService _fileService = new DelimitedFileService();
 
             _workbook = await _fileService.GenerateModel(file);
 

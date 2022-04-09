@@ -22,7 +22,7 @@ using IHost host = Host.CreateDefaultBuilder(args)
 
 await TestGenerateCsv();
 
-await TestImportCsv();
+//await TestImportCsv();
 
 
 // Run the application
@@ -50,6 +50,7 @@ async Task TestGenerateCsv()
         var workbook = spreadsheet.Workbook;
 
         workbook.Creator = "Kevin Williams";
+        workbook.ColumnDelimeter = ColumnDelimeter.Tab;
 
         var sheet1 = await workbook.AddSheetAsync();
 
@@ -62,7 +63,19 @@ async Task TestGenerateCsv()
         var csvFile = await spreadsheet.GenerateCsvFileAsync();
 
         // Save compressed file
-        await File.WriteAllBytesAsync(@"C:\Temp\New File.csv", csvFile);
+        switch(workbook.ColumnDelimeter)
+        {
+            case ColumnDelimeter.ASCII:
+            case ColumnDelimeter.Pipe:
+            case ColumnDelimeter.Tab:
+                await File.WriteAllBytesAsync(@"C:\Temp\New File.txt", csvFile);
+                break;
+
+            case ColumnDelimeter.Comma:
+            default:
+                await File.WriteAllBytesAsync(@"C:\Temp\New File.csv", csvFile);
+                break;
+        }
     }
 }
 
