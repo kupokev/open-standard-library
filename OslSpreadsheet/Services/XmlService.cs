@@ -49,6 +49,28 @@ namespace OslSpreadsheet.Services
             }
         }
 
+        //async Task TestConvertXmlToObject()
+        //{
+        //    var xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+        //        + "<document-meta xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" office:version=\"1.3\" >"
+        //        + "<meta>"
+        //        + "<generator>Open Standard Library v1.0.0</generator>"
+        //        + "<initial-creator>Open Standard Library v1.0.0</initial-creator>"
+        //        + "<creator>Open Standard Library v1.0.0</creator>"
+        //        + "<creation-date>2022-01-08T23:01:46Z </creation-date>"
+        //        + "<date>2022-01-08T23:01:46Z</date>"
+        //        + "</meta>"
+        //        + "</document-meta>";
+
+        //    var obj = await XmlService.ConvertToObject<ODMeta>(xml);
+        //}
+
+        /// <summary>
+        /// Converts XML to a model
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="xml"></param>
+        /// <returns></returns>
         internal static async Task<object> ConvertToObject<T>(string xml)
         {
             T retval = default;
