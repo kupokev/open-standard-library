@@ -8,6 +8,7 @@ All notable changes to Open Standard Library will be documented in this file.
 
 ### Added
 - **File encoding options** — Added `FileEncoding` enum (`UTF8`, `ASCII`, `Unicode`, `UTF32`) and `FileEncoding` property on `oWorkbook`. Delimited file export and import now use the configured encoding instead of hardcoded UTF-8. Does not affect ODS or XLSX, which require UTF-8 per their specifications
+- **Dynamic version string** — Generator name and version are now derived from the assembly version at runtime, which is set automatically from the git tag during CI builds. Replaces hardcoded version strings in `oWorkbook` and ODS metadata
 
 ---
 

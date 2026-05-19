@@ -15,7 +15,7 @@
         /// <summary>
         /// Application that generated this file
         /// </summary>
-        public string Generator { get; set; } = "Open Standard Library v1";
+        public string Generator { get; set; } = AssemblyInfo.AppName;
 
         public string InitialCreator { get; set; } = "";
 
