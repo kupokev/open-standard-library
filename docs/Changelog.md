@@ -4,6 +4,13 @@ All notable changes to Open Standard Library will be documented in this file.
 
 ---
 
+## v1.0.2 — 2026-05-19
+
+### Added
+- **File encoding options** — Added `FileEncoding` enum (`UTF8`, `ASCII`, `Unicode`, `UTF32`) and `FileEncoding` property on `oWorkbook`. Delimited file export and import now use the configured encoding instead of hardcoded UTF-8. Does not affect ODS or XLSX, which require UTF-8 per their specifications
+
+---
+
 ## v1.0.1 — 2026-05-01
 
 ### Added

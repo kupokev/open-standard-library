@@ -25,6 +25,12 @@
 
         public ColumnDelimeter ColumnDelimeter { get; set; } = ColumnDelimeter.Comma;
 
+        /// <summary>
+        /// Character encoding used when reading or writing delimited files (CSV, TSV, etc.).
+        /// Does not apply to ODS or XLSX formats, which require UTF-8 per their specifications.
+        /// </summary>
+        public FileEncoding FileEncoding { get; set; } = FileEncoding.UTF8;
+
         public List<oSpreadsheet> Sheets { get; set; }
 
         public oSpreadsheet AddSheet()
