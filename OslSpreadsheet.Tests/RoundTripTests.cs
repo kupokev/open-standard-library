@@ -4,8 +4,14 @@ using Xunit;
 
 namespace OslSpreadsheet.Tests;
 
+/// <summary>
+/// Tests that verify data survives a generate-then-import cycle for each supported file format.
+/// </summary>
 public class RoundTripTests
 {
+    /// <summary>
+    /// Populates a workbook with a 3x3 grid of mixed types (string headers, float scores, empty cell).
+    /// </summary>
     private static oWorkbook BuildTestWorkbook(oWorkbook workbook)
     {
         var sheet = workbook.AddSheet("Data");
@@ -23,6 +29,9 @@ public class RoundTripTests
 
     // --- ODS ---
 
+    /// <summary>
+    /// Verifies the sheet name survives an ODS round-trip.
+    /// </summary>
     [Fact]
     public async Task Ods_RoundTrip_PreservesSheetName()
     {
@@ -38,6 +47,9 @@ public class RoundTripTests
         Assert.Equal("Data", workbook.Sheets[0].SheetName);
     }
 
+    /// <summary>
+    /// Verifies string cell values survive an ODS round-trip.
+    /// </summary>
     [Fact]
     public async Task Ods_RoundTrip_PreservesCellValues()
     {
@@ -55,6 +67,9 @@ public class RoundTripTests
         Assert.Equal("Bob", sheet.GetRow(3).First(c => c.Column == 1).Value);
     }
 
+    /// <summary>
+    /// Verifies float cell values and their value type survive an ODS round-trip.
+    /// </summary>
     [Fact]
     public async Task Ods_RoundTrip_PreservesFloatValues()
     {
@@ -72,6 +87,9 @@ public class RoundTripTests
         Assert.Equal(CellValueType.Float, scoreCell.ValueType);
     }
 
+    /// <summary>
+    /// Verifies row and column counts are preserved after an ODS round-trip.
+    /// </summary>
     [Fact]
     public async Task Ods_RoundTrip_PreservesRowAndColumnCounts()
     {
@@ -88,6 +106,9 @@ public class RoundTripTests
         Assert.Equal(3, sheet.ColumnCount);
     }
 
+    /// <summary>
+    /// Verifies multiple sheets with distinct names and data survive an ODS round-trip.
+    /// </summary>
     [Fact]
     public async Task Ods_RoundTrip_MultipleSheets()
     {
@@ -109,6 +130,9 @@ public class RoundTripTests
         Assert.Equal("Sheet2Data", workbook.Sheets[1].Cells[0].Value);
     }
 
+    /// <summary>
+    /// Verifies ODS generation produces a non-empty byte array.
+    /// </summary>
     [Fact]
     public async Task Ods_Generate_ProducesNonEmptyBytes()
     {
@@ -123,6 +147,9 @@ public class RoundTripTests
 
     // --- XLSX ---
 
+    /// <summary>
+    /// Verifies the sheet name survives an XLSX round-trip.
+    /// </summary>
     [Fact]
     public async Task Xlsx_RoundTrip_PreservesSheetName()
     {
@@ -138,6 +165,9 @@ public class RoundTripTests
         Assert.Equal("Data", workbook.Sheets[0].SheetName);
     }
 
+    /// <summary>
+    /// Verifies string cell values survive an XLSX round-trip.
+    /// </summary>
     [Fact]
     public async Task Xlsx_RoundTrip_PreservesCellValues()
     {
@@ -155,6 +185,9 @@ public class RoundTripTests
         Assert.Equal("Bob", sheet.GetRow(3).First(c => c.Column == 1).Value);
     }
 
+    /// <summary>
+    /// Verifies float cell values and their value type survive an XLSX round-trip.
+    /// </summary>
     [Fact]
     public async Task Xlsx_RoundTrip_PreservesFloatValues()
     {
@@ -172,6 +205,9 @@ public class RoundTripTests
         Assert.Equal(CellValueType.Float, scoreCell.ValueType);
     }
 
+    /// <summary>
+    /// Verifies row and column counts are preserved after an XLSX round-trip.
+    /// </summary>
     [Fact]
     public async Task Xlsx_RoundTrip_PreservesRowAndColumnCounts()
     {
@@ -188,6 +224,9 @@ public class RoundTripTests
         Assert.Equal(3, sheet.ColumnCount);
     }
 
+    /// <summary>
+    /// Verifies multiple sheets with distinct names and data survive an XLSX round-trip.
+    /// </summary>
     [Fact]
     public async Task Xlsx_RoundTrip_MultipleSheets()
     {
@@ -209,6 +248,9 @@ public class RoundTripTests
         Assert.Equal("Sheet2Data", workbook.Sheets[1].Cells[0].Value);
     }
 
+    /// <summary>
+    /// Verifies XLSX generation produces a non-empty byte array.
+    /// </summary>
     [Fact]
     public async Task Xlsx_Generate_ProducesNonEmptyBytes()
     {
@@ -223,6 +265,9 @@ public class RoundTripTests
 
     // --- CSV ---
 
+    /// <summary>
+    /// Verifies string cell values survive a CSV round-trip.
+    /// </summary>
     [Fact]
     public async Task Csv_RoundTrip_PreservesCellValues()
     {
@@ -245,6 +290,9 @@ public class RoundTripTests
         Assert.Equal("95.5", imported.GetRow(2).First(c => c.Column == 2).Value);
     }
 
+    /// <summary>
+    /// Verifies CSV generation produces a non-empty byte array.
+    /// </summary>
     [Fact]
     public async Task Csv_Generate_ProducesNonEmptyBytes()
     {
@@ -258,6 +306,9 @@ public class RoundTripTests
         Assert.True(bytes.Length > 0);
     }
 
+    /// <summary>
+    /// Verifies values containing commas survive a CSV round-trip via quote wrapping.
+    /// </summary>
     [Fact]
     public async Task Csv_RoundTrip_HandlesCommasInValues()
     {
@@ -276,9 +327,11 @@ public class RoundTripTests
         Assert.Equal("Normal", imported.GetRow(1).First(c => c.Column == 2).Value);
     }
 
-    // CSV import does not unescape doubled quotes (e.g. 5"" Fitting -> 5"" Fitting instead of 5" Fitting)
+    /// <summary>
+    /// Verifies embedded double-quotes are escaped on export and unescaped on import per RFC-4180.
+    /// </summary>
     [Fact]
-    public async Task Csv_RoundTrip_EmbeddedQuotes_KnownBug()
+    public async Task Csv_RoundTrip_EmbeddedQuotes()
     {
         using var spreadsheet = new Spreadsheet();
         var sheet = spreadsheet.Workbook.AddSheet("Data");
@@ -290,12 +343,14 @@ public class RoundTripTests
         var workbook = await importer.ImportCsvFileAsync(bytes);
         var imported = workbook.Sheets[0];
 
-        // Current behavior: doubled quotes are NOT unescaped on import
-        Assert.Equal("5\"\" Fitting", imported.GetRow(1).First(c => c.Column == 1).Value);
+        Assert.Equal("5\" Fitting", imported.GetRow(1).First(c => c.Column == 1).Value);
     }
 
     // --- Boolean ---
 
+    /// <summary>
+    /// Verifies boolean cell values and their value type survive an XLSX round-trip.
+    /// </summary>
     [Fact]
     public async Task Xlsx_RoundTrip_PreservesBooleanValues()
     {
@@ -321,6 +376,9 @@ public class RoundTripTests
         Assert.Equal(CellValueType.Boolean, falseCell.ValueType);
     }
 
+    /// <summary>
+    /// Verifies boolean cell values and their value type survive an ODS round-trip.
+    /// </summary>
     [Fact]
     public async Task Ods_RoundTrip_PreservesBooleanValues()
     {
@@ -346,6 +404,9 @@ public class RoundTripTests
         Assert.Equal(CellValueType.Boolean, falseCell.ValueType);
     }
 
+    /// <summary>
+    /// Verifies a row with mixed value types (string, float, boolean) preserves each type after an XLSX round-trip.
+    /// </summary>
     [Fact]
     public async Task Xlsx_RoundTrip_BooleanMixedWithOtherTypes()
     {
@@ -368,6 +429,9 @@ public class RoundTripTests
 
     // --- Empty workbook ---
 
+    /// <summary>
+    /// Verifies an ODS file can be generated from an empty sheet without throwing.
+    /// </summary>
     [Fact]
     public async Task Ods_EmptySheet_GeneratesWithoutError()
     {
@@ -378,6 +442,9 @@ public class RoundTripTests
         Assert.True(bytes.Length > 0);
     }
 
+    /// <summary>
+    /// Verifies an XLSX file can be generated from an empty sheet without throwing.
+    /// </summary>
     [Fact]
     public async Task Xlsx_EmptySheet_GeneratesWithoutError()
     {

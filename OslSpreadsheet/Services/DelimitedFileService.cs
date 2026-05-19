@@ -150,7 +150,8 @@ namespace OslSpreadsheet.Services
                     // Cycle through the columns and add to list
                     for (int c = 0; c < cols.Count(); c++)
                     {
-                        sheet1.AddCell(r + 1, c + 1, cols[c]);
+                        // Unescape doubled quotes per RFC-4180
+                        sheet1.AddCell(r + 1, c + 1, cols[c].Replace("\"\"", "\""));
                     }
                 }
             }

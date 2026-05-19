@@ -10,6 +10,9 @@ All notable changes to Open Standard Library will be documented in this file.
 - **File encoding options** — Added `FileEncoding` enum (`UTF8`, `ASCII`, `Unicode`, `UTF32`) and `FileEncoding` property on `oWorkbook`. Delimited file export and import now use the configured encoding instead of hardcoded UTF-8. Does not affect ODS or XLSX, which require UTF-8 per their specifications
 - **Dynamic version string** — Generator name and version are now derived from the assembly version at runtime, which is set automatically from the git tag during CI builds. Replaces hardcoded version strings in `oWorkbook` and ODS metadata
 
+### Fixed
+- **CSV import quote-escaping bug** — Doubled quotes (`""`) are now correctly unescaped to single quotes (`"`) on CSV import per RFC-4180
+
 ---
 
 ## v1.0.1 — 2026-05-01
@@ -33,9 +36,6 @@ All notable changes to Open Standard Library will be documented in this file.
 - **Boolean cell value type** — Added `CellValueType.Boolean` with full generate/import support for both XLSX (`t="b"`) and ODS (`office:boolean-value`). Values stored as `"true"`/`"false"` strings
 - **Test project** — Added `OslSpreadsheet.Tests` with 102 xUnit tests covering workbook creation, sheet/cell operations, boolean values, cell styling, text wrapping, freeze panes, column widths, and round-trip generate/import for ODS, XLSX, and CSV formats
 - **CI/CD** — GitHub Actions workflow to publish to NuGet on version tags
-
-### Known Issues
-- **CSV import quote-escaping bug** — Embedded double-quotes are not unescaped on import (e.g., `5"" Fitting` stays as-is instead of becoming `5" Fitting`)
 
 ---
 
