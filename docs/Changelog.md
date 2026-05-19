@@ -9,6 +9,8 @@ All notable changes to Open Standard Library will be documented in this file.
 ### Added
 - **File encoding options** — Added `FileEncoding` enum (`UTF8`, `ASCII`, `Unicode`, `UTF32`) and `FileEncoding` property on `oWorkbook`. Delimited file export and import now use the configured encoding instead of hardcoded UTF-8. Does not affect ODS or XLSX, which require UTF-8 per their specifications
 - **Dynamic version string** — Generator name and version are now derived from the assembly version at runtime, which is set automatically from the git tag during CI builds. Replaces hardcoded version strings in `oWorkbook` and ODS metadata
+- **Header row detection** — Added `HasHeaderRow` property, `HeaderNames` computed property, and `GetColumn(string headerName)` method to `oSpreadsheet`. When `HasHeaderRow` is true, first-row values are exposed as column names and data cells can be retrieved by header name
+- **Streaming CSV row reader** — Added `ReadCsvRowsAsync(Stream, bool hasHeaderRow, int? rowLimit)` to `Spreadsheet`. Reads rows one at a time via `IAsyncEnumerable<string[]>` without loading the entire file into memory. Supports optional header row consumption (stored in `CsvHeaders`) and row limit
 
 ### Fixed
 - **CSV import quote-escaping bug** — Doubled quotes (`""`) are now correctly unescaped to single quotes (`"`) on CSV import per RFC-4180

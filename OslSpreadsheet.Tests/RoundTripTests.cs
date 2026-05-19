@@ -427,6 +427,194 @@ public class RoundTripTests
         Assert.Equal(CellValueType.Boolean, row.First(c => c.Column == 3).ValueType);
     }
 
+    // --- Header row ---
+
+    /// <summary>
+    /// Verifies HasHeaderRow exposes first-row values via HeaderNames.
+    /// </summary>
+    [Fact]
+    public void Sheet_HasHeaderRow_ExposesHeaderNames()
+    {
+        var workbook = new oWorkbook();
+        var sheet = workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(1, 2, "Score");
+        sheet.AddCell(2, 1, "Alice");
+        sheet.AddCell(2, 2, "95");
+
+        Assert.Empty(sheet.HeaderNames);
+
+        sheet.HasHeaderRow = true;
+        Assert.Equal(new[] { "Name", "Score" }, sheet.HeaderNames);
+    }
+
+    /// <summary>
+    /// Verifies GetColumn returns data cells (excluding the header) by header name.
+    /// </summary>
+    [Fact]
+    public void Sheet_GetColumn_ReturnsCellsByHeaderName()
+    {
+        var workbook = new oWorkbook();
+        var sheet = workbook.AddSheet("Data");
+        sheet.HasHeaderRow = true;
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(1, 2, "Score");
+        sheet.AddCell(2, 1, "Alice");
+        sheet.AddCell(2, 2, "95");
+        sheet.AddCell(3, 1, "Bob");
+        sheet.AddCell(3, 2, "82");
+
+        var names = sheet.GetColumn("Name");
+        Assert.Equal(2, names.Count);
+        Assert.Equal("Alice", names[0].Value);
+        Assert.Equal("Bob", names[1].Value);
+
+        var scores = sheet.GetColumn("Score");
+        Assert.Equal(2, scores.Count);
+        Assert.Equal("95", scores[0].Value);
+        Assert.Equal("82", scores[1].Value);
+    }
+
+    /// <summary>
+    /// Verifies GetColumn returns empty list when HasHeaderRow is false.
+    /// </summary>
+    [Fact]
+    public void Sheet_GetColumn_WithoutHeaderRow_ReturnsEmpty()
+    {
+        var workbook = new oWorkbook();
+        var sheet = workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(2, 1, "Alice");
+
+        Assert.Empty(sheet.GetColumn("Name"));
+    }
+
+    /// <summary>
+    /// Verifies GetColumn returns empty list for a non-existent header name.
+    /// </summary>
+    [Fact]
+    public void Sheet_GetColumn_UnknownHeader_ReturnsEmpty()
+    {
+        var workbook = new oWorkbook();
+        var sheet = workbook.AddSheet("Data");
+        sheet.HasHeaderRow = true;
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(2, 1, "Alice");
+
+        Assert.Empty(sheet.GetColumn("Missing"));
+    }
+
+    // --- Streaming CSV reader ---
+
+    /// <summary>
+    /// Verifies ReadCsvRowsAsync streams all rows from a CSV without loading the entire file.
+    /// </summary>
+    [Fact]
+    public async Task ReadCsvRows_StreamsAllRows()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Alice");
+        sheet.AddCell(1, 2, "95");
+        sheet.AddCell(2, 1, "Bob");
+        sheet.AddCell(2, 2, "82");
+
+        var csvBytes = await spreadsheet.GenerateCsvFileAsync();
+        using var stream = new MemoryStream(csvBytes);
+
+        using var reader = new Spreadsheet();
+        var rows = new List<string[]>();
+        await foreach (var row in reader.ReadCsvRowsAsync(stream))
+            rows.Add(row);
+
+        Assert.Equal(2, rows.Count);
+        Assert.Equal("Alice", rows[0][0]);
+        Assert.Equal("95", rows[0][1]);
+        Assert.Equal("Bob", rows[1][0]);
+        Assert.Equal("82", rows[1][1]);
+    }
+
+    /// <summary>
+    /// Verifies ReadCsvRowsAsync consumes the first row as headers when hasHeaderRow is true.
+    /// </summary>
+    [Fact]
+    public async Task ReadCsvRows_WithHeaderRow_SetsHeaders()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(1, 2, "Score");
+        sheet.AddCell(2, 1, "Alice");
+        sheet.AddCell(2, 2, "95");
+        sheet.AddCell(3, 1, "Bob");
+        sheet.AddCell(3, 2, "82");
+
+        var csvBytes = await spreadsheet.GenerateCsvFileAsync();
+        using var stream = new MemoryStream(csvBytes);
+
+        using var reader = new Spreadsheet();
+        var rows = new List<string[]>();
+        await foreach (var row in reader.ReadCsvRowsAsync(stream, hasHeaderRow: true))
+            rows.Add(row);
+
+        Assert.Equal(new[] { "Name", "Score" }, reader.CsvHeaders);
+        Assert.Equal(2, rows.Count);
+        Assert.Equal("Alice", rows[0][0]);
+        Assert.Equal("Bob", rows[1][0]);
+    }
+
+    /// <summary>
+    /// Verifies ReadCsvRowsAsync respects the rowLimit parameter.
+    /// </summary>
+    [Fact]
+    public async Task ReadCsvRows_WithRowLimit_StopsAtLimit()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "A");
+        sheet.AddCell(2, 1, "B");
+        sheet.AddCell(3, 1, "C");
+        sheet.AddCell(4, 1, "D");
+
+        var csvBytes = await spreadsheet.GenerateCsvFileAsync();
+        using var stream = new MemoryStream(csvBytes);
+
+        using var reader = new Spreadsheet();
+        var rows = new List<string[]>();
+        await foreach (var row in reader.ReadCsvRowsAsync(stream, rowLimit: 2))
+            rows.Add(row);
+
+        Assert.Equal(2, rows.Count);
+        Assert.Equal("A", rows[0][0]);
+        Assert.Equal("B", rows[1][0]);
+    }
+
+    /// <summary>
+    /// Verifies ReadCsvRowsAsync works with both hasHeaderRow and rowLimit together.
+    /// </summary>
+    [Fact]
+    public async Task ReadCsvRows_HeaderAndLimit_Combined()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(2, 1, "Alice");
+        sheet.AddCell(3, 1, "Bob");
+        sheet.AddCell(4, 1, "Charlie");
+
+        var csvBytes = await spreadsheet.GenerateCsvFileAsync();
+        using var stream = new MemoryStream(csvBytes);
+
+        using var reader = new Spreadsheet();
+        var rows = new List<string[]>();
+        await foreach (var row in reader.ReadCsvRowsAsync(stream, hasHeaderRow: true, rowLimit: 1))
+            rows.Add(row);
+
+        Assert.Equal(new[] { "Name" }, reader.CsvHeaders);
+        Assert.Single(rows);
+        Assert.Equal("Alice", rows[0][0]);
+    }
+
     // --- Empty workbook ---
 
     /// <summary>
