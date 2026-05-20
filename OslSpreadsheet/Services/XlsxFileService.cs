@@ -264,8 +264,13 @@ namespace OslSpreadsheet.Services
             return Utf8(sb.ToString());
         }
 
-        private const int DateNumFmtId = 164;
-        private const string DateFormatCode = "yyyy-mm-dd hh:mm:ss";
+        private const int DateTimeNumFmtId = 164;
+        private const string DateTimeFormatCode = "yyyy-mm-dd hh:mm:ss";
+        private const int DateOnlyNumFmtId = 165;
+        private const string DateOnlyFormatCode = "yyyy-mm-dd";
+
+        private static bool IsDateOnly(string value) =>
+            System.DateTime.TryParse(value, out var dt) && dt.TimeOfDay == TimeSpan.Zero && !value.Contains('T');
 
         private static readonly HashSet<int> BuiltInDateNumFmtIds =
             new(Enumerable.Range(14, 9)
@@ -301,9 +306,11 @@ namespace OslSpreadsheet.Services
             foreach (var sheet in workbook.Sheets)
                 foreach (var cell in sheet.Cells)
                 {
-                    int numFmtId = cell.ValueType == CellValueType.DateTime ? DateNumFmtId : 0;
+                    int numFmtId = cell.ValueType == CellValueType.DateTime
+                        ? (IsDateOnly(cell.Value) ? DateOnlyNumFmtId : DateTimeNumFmtId)
+                        : 0;
                     var style = cell.Style ?? new CellStyle();
-                    var mapKey = numFmtId > 0 ? $"dt|{GetStyleKey(style)}" : GetStyleKey(style);
+                    var mapKey = numFmtId > 0 ? $"dt{numFmtId}|{GetStyleKey(style)}" : GetStyleKey(style);
 
                     if (cell.Style != null || numFmtId > 0)
                         uniqueEntries.TryAdd(mapKey, (style, numFmtId));
@@ -364,7 +371,15 @@ namespace OslSpreadsheet.Services
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
             sb.Append("<styleSheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">");
             if (hasDateCells)
-                sb.Append($"<numFmts count=\"1\"><numFmt numFmtId=\"{DateNumFmtId}\" formatCode=\"{DateFormatCode}\"/></numFmts>");
+            {
+                var usedFmtIds = uniqueEntries.Values.Select(e => e.numFmtId).Where(id => id > 0).Distinct().ToList();
+                sb.Append($"<numFmts count=\"{usedFmtIds.Count}\">");
+                if (usedFmtIds.Contains(DateTimeNumFmtId))
+                    sb.Append($"<numFmt numFmtId=\"{DateTimeNumFmtId}\" formatCode=\"{DateTimeFormatCode}\"/>");
+                if (usedFmtIds.Contains(DateOnlyNumFmtId))
+                    sb.Append($"<numFmt numFmtId=\"{DateOnlyNumFmtId}\" formatCode=\"{DateOnlyFormatCode}\"/>");
+                sb.Append("</numFmts>");
+            }
             sb.Append($"<fonts count=\"{fonts.Count}\">");
             foreach (var f in fonts) sb.Append(f);
             sb.Append("</fonts>");
@@ -498,7 +513,8 @@ namespace OslSpreadsheet.Services
 
                     if (cell.ValueType == CellValueType.DateTime)
                     {
-                        var dateKey = visualKey != null ? $"dt|{visualKey}" : $"dt|{GetStyleKey(new CellStyle())}";
+                        int fmtId = IsDateOnly(cell.Value) ? DateOnlyNumFmtId : DateTimeNumFmtId;
+                        var dateKey = visualKey != null ? $"dt{fmtId}|{visualKey}" : $"dt{fmtId}|{GetStyleKey(new CellStyle())}";
                         if (styleIndexMap.TryGetValue(dateKey, out int si))
                             styleAttr = $" s=\"{si}\"";
                     }

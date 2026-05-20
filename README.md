@@ -114,6 +114,10 @@ cell.ToEpochSeconds(); // Value becomes "1747650600", ValueType becomes Int64
 - .NET 9.0
 - .NET 10.0
 
+## Disclaimer
+
+This software is provided "as is", without warranty of any kind. Use at your own risk. See the [LICENSE](LICENSE) file for full terms.
+
 ## License
 
 MIT

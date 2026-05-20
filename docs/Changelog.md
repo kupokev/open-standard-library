@@ -13,6 +13,7 @@ All notable changes to Open Standard Library will be documented in this file.
 - **Streaming CSV row reader** — Added `ReadCsvRowsAsync(Stream, bool hasHeaderRow, int? rowLimit)` to `Spreadsheet`. Reads rows one at a time via `IAsyncEnumerable<string[]>` without loading the entire file into memory. Supports optional header row consumption (stored in `CsvHeaders`) and row limit
 - **DateTime and Int64 cell value types** — Added `CellValueType.DateTime` and `CellValueType.Int64`. DateTime values are stored as ISO 8601 strings and round-trip through both XLSX (OLE Automation serial dates with numFmt style) and ODS (`office:date-value` attribute). Int64 is exported as a numeric value in both formats. XLSX import detects date-formatted cells by reading styles.xml numFmtIds
 - **Epoch time conversion** — Added `FromEpochSeconds()`, `FromEpochMilliseconds()`, `ToEpochSeconds()`, and `ToEpochMilliseconds()` extension methods on `oCell`. Converts between Unix epoch timestamps and ISO 8601 DateTime values. All conversions treat values as UTC
+- **Date-only formatting** — DateTime cells with date-only values (no time component) now use a `yyyy-mm-dd` format in both XLSX and ODS, instead of showing `00:00:00` for the time portion
 
 ### Fixed
 - **CSV import quote-escaping bug** — Doubled quotes (`""`) are now correctly unescaped to single quotes (`"`) on CSV import per RFC-4180
