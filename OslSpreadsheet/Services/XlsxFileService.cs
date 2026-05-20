@@ -194,6 +194,9 @@ namespace OslSpreadsheet.Services
                         sheet.AutoFilterRange = (startRow, startCol, endRow, endCol);
                     }
                 }
+
+                if ((sheet.AutoFilterRange?.StartRow == 1) || sheet.FreezeRows >= 1)
+                    sheet.HasHeaderRow = true;
             }
 
             return workbook;

@@ -568,6 +568,133 @@ public class RoundTripTests
     // --- Header row ---
 
     /// <summary>
+    /// Verifies HasHeaderRow is auto-detected on XLSX import when the sheet has an autoFilter starting at row 1.
+    /// </summary>
+    [Fact]
+    public async Task Xlsx_Import_DetectsHeaderRow_WithAutoFilter()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(1, 2, "Score");
+        sheet.AddCell(2, 1, "Alice");
+        sheet.AddCell(2, 2, "95");
+        sheet.SetAutoFilter();
+
+        var bytes = await spreadsheet.GenerateXlsxFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportXlsxFileAsync(bytes);
+        var imported = workbook.Sheets[0];
+
+        Assert.True(imported.HasHeaderRow);
+        Assert.Equal(new[] { "Name", "Score" }, imported.HeaderNames);
+        Assert.Equal("Alice", imported.GetColumn("Name").First().Value);
+    }
+
+    /// <summary>
+    /// Verifies HasHeaderRow is auto-detected on XLSX import when the sheet has frozen rows.
+    /// </summary>
+    [Fact]
+    public async Task Xlsx_Import_DetectsHeaderRow_WithFreezePanes()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(2, 1, "Alice");
+        sheet.FreezeRows = 1;
+
+        var bytes = await spreadsheet.GenerateXlsxFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportXlsxFileAsync(bytes);
+
+        Assert.True(workbook.Sheets[0].HasHeaderRow);
+    }
+
+    /// <summary>
+    /// Verifies HasHeaderRow is not set on XLSX import when there is no autoFilter or freeze panes.
+    /// </summary>
+    [Fact]
+    public async Task Xlsx_Import_NoHeaderRow_WhenNoSignals()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Alice");
+        sheet.AddCell(2, 1, "Bob");
+
+        var bytes = await spreadsheet.GenerateXlsxFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportXlsxFileAsync(bytes);
+
+        Assert.False(workbook.Sheets[0].HasHeaderRow);
+    }
+
+    /// <summary>
+    /// Verifies HasHeaderRow is auto-detected on ODS import when the sheet has an autoFilter starting at row 1.
+    /// </summary>
+    [Fact]
+    public async Task Ods_Import_DetectsHeaderRow_WithAutoFilter()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(1, 2, "Score");
+        sheet.AddCell(2, 1, "Alice");
+        sheet.AddCell(2, 2, "95");
+        sheet.SetAutoFilter();
+
+        var bytes = await spreadsheet.GenerateOdsFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportOdsFileAsync(bytes);
+        var imported = workbook.Sheets[0];
+
+        Assert.True(imported.HasHeaderRow);
+        Assert.Equal(new[] { "Name", "Score" }, imported.HeaderNames);
+    }
+
+    /// <summary>
+    /// Verifies HasHeaderRow is auto-detected on ODS import when the sheet has frozen rows.
+    /// </summary>
+    [Fact]
+    public async Task Ods_Import_DetectsHeaderRow_WithFreezePanes()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Name");
+        sheet.AddCell(2, 1, "Alice");
+        sheet.FreezeRows = 1;
+
+        var bytes = await spreadsheet.GenerateOdsFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportOdsFileAsync(bytes);
+
+        Assert.True(workbook.Sheets[0].HasHeaderRow);
+    }
+
+    /// <summary>
+    /// Verifies HasHeaderRow is not set on ODS import when there is no autoFilter or freeze panes.
+    /// </summary>
+    [Fact]
+    public async Task Ods_Import_NoHeaderRow_WhenNoSignals()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Alice");
+        sheet.AddCell(2, 1, "Bob");
+
+        var bytes = await spreadsheet.GenerateOdsFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportOdsFileAsync(bytes);
+
+        Assert.False(workbook.Sheets[0].HasHeaderRow);
+    }
+
+    /// <summary>
     /// Verifies HasHeaderRow exposes first-row values via HeaderNames.
     /// </summary>
     [Fact]
