@@ -75,7 +75,7 @@ public class WorkbookTests
     public void Workbook_DefaultProperties()
     {
         var workbook = new oWorkbook();
-        Assert.Equal("Open Standard Library v1", workbook.Generator);
+        Assert.StartsWith("Open Standard Library v", workbook.Generator);
         Assert.Equal("", workbook.InitialCreator);
         Assert.Equal("", workbook.Creator);
         Assert.Equal("", workbook.CreationDate);

@@ -22,7 +22,7 @@ namespace OslSpreadsheet.Services
 
             try
             {
-                var content = GenerateContentFile(workbook);
+                var (content, hasDateOnly, hasDateTime) = GenerateContentFile(workbook);
                 var meta = GenerateMetaFile(workbook);
                 var style = GenerateStyleFile(workbook);
 
@@ -49,7 +49,7 @@ namespace OslSpreadsheet.Services
                     new InMemoryFile()
                     {
                         FileName = "content.xml",
-                        Content = await XmlService.ConvertToXmlAsync(content)
+                        Content = InjectOdsDateStyles(await XmlService.ConvertToXmlAsync(content), hasDateOnly, hasDateTime)
                     },
                     new InMemoryFile()
                     {
@@ -133,6 +133,12 @@ namespace OslSpreadsheet.Services
                             {
                                 cellType = CellValueType.Boolean;
                                 cellValue = booleanValue ?? textValue ?? "false";
+                            }
+                            else if (valueType == "date")
+                            {
+                                cellType = CellValueType.DateTime;
+                                var dateValue = cell.Attribute(officeNs + "date-value")?.Value;
+                                cellValue = dateValue ?? textValue ?? "";
                             }
                             else if (valueType == "float")
                             {
@@ -218,14 +224,20 @@ namespace OslSpreadsheet.Services
                     sheet.AutoFilterRange = (startRow, startCol, endRow, endCol);
             }
 
+            foreach (var sheet in workbook.Sheets)
+            {
+                if ((sheet.AutoFilterRange?.StartRow == 1) || sheet.FreezeRows >= 1)
+                    sheet.HasHeaderRow = true;
+            }
+
             return workbook;
         }
 
-        private ODContent GenerateContentFile(oWorkbook workbook)
+        private (ODContent content, bool hasDateOnly, bool hasDateTime) GenerateContentFile(oWorkbook workbook)
         {
             var file = new ODContent();
 
-            var cellStyleMap = BuildOdsCellStyles(workbook, file);
+            var cellStyleMap = BuildOdsCellStyles(workbook, file, out bool hasDateOnly, out bool hasDateTime);
 
             foreach (var s in workbook.Sheets)
             {
@@ -292,7 +304,14 @@ namespace OslSpreadsheet.Services
                             if (cell != null)
                             {
                                 var cellStyleName = "ce1";
-                                if (cell.Style != null)
+                                if (cell.ValueType == CellValueType.DateTime)
+                                {
+                                    var datePrefix = IsDateOnly(cell.Value) ? "do|" : "dt|";
+                                    var visualKey = cell.Style != null ? GetStyleKey(cell.Style) : "";
+                                    if (cellStyleMap.TryGetValue($"{datePrefix}{visualKey}", out var mapped))
+                                        cellStyleName = mapped;
+                                }
+                                else if (cell.Style != null)
                                 {
                                     var key = GetStyleKey(cell.Style);
                                     if (cellStyleMap.TryGetValue(key, out var mapped))
@@ -305,7 +324,7 @@ namespace OslSpreadsheet.Services
                                     TextValue = cell.Value
                                 };
 
-                                if (cell.ValueType == CellValueType.Float)
+                                if (cell.ValueType == CellValueType.Float || cell.ValueType == CellValueType.Int64)
                                 {
                                     tableCell.ValueType = "float";
                                     tableCell.NumericValue = cell.Value;
@@ -314,6 +333,11 @@ namespace OslSpreadsheet.Services
                                 {
                                     tableCell.ValueType = "boolean";
                                     tableCell.BooleanValue = cell.Value.Equals("true", StringComparison.OrdinalIgnoreCase) ? "true" : "false";
+                                }
+                                else if (cell.ValueType == CellValueType.DateTime)
+                                {
+                                    tableCell.ValueType = "date";
+                                    tableCell.DateValue = cell.Value;
                                 }
                                 else
                                 {
@@ -392,7 +416,7 @@ namespace OslSpreadsheet.Services
                 file.body.spreadsheet.databaseRanges.Ranges = dbRanges;
             }
 
-            return file;
+            return (file, hasDateOnly, hasDateTime);
         }
 
         /// <summary>
@@ -446,61 +470,124 @@ namespace OslSpreadsheet.Services
             return file;
         }
 
-        private static Dictionary<string, string> BuildOdsCellStyles(oWorkbook workbook, ODContent file)
+        private const string OdsDateStyleName = "NDdate";
+        private const string OdsDateTimeStyleName = "NDdatetime";
+
+        private static Dictionary<string, string> BuildOdsCellStyles(oWorkbook workbook, ODContent file, out bool hasDateOnly, out bool hasDateTime)
         {
             var map = new Dictionary<string, string>();
             var nextIndex = 2;
+            hasDateOnly = false;
+            hasDateTime = false;
 
             foreach (var sheet in workbook.Sheets)
                 foreach (var cell in sheet.Cells)
-                    if (cell.Style != null)
+                {
+                    var cs = cell.Style ?? new CellStyle();
+                    var visualKey = cell.Style != null ? GetStyleKey(cs) : null;
+                    string? datePrefix = null;
+
+                    if (cell.ValueType == CellValueType.DateTime)
                     {
-                        var key = GetStyleKey(cell.Style);
-                        if (map.ContainsKey(key)) continue;
-
-                        var name = $"ce{nextIndex++}";
-                        map[key] = name;
-
-                        var style = new ODContent.AutomaticStyles.Style
-                        {
-                            Name = name,
-                            Family = "table-cell",
-                            ParentStyleName = "Default",
-                            DataStyleName = "N0"
-                        };
-
-                        var cs = cell.Style;
-
-                        if (cs.Bold || cs.Italic || cs.Underline || cs.FontColor != null || cs.FontName != null || cs.FontSize != null)
-                        {
-                            style.textProperties = new ODContent.AutomaticStyles.Style.TextProperties();
-                            if (cs.Bold) style.textProperties.FontWeight = "bold";
-                            if (cs.Italic) style.textProperties.FontStyle = "italic";
-                            if (cs.Underline)
-                            {
-                                style.textProperties.TextUnderlineStyle = "solid";
-                                style.textProperties.TextUnderlineWidth = "auto";
-                            }
-                            if (cs.FontColor != null) style.textProperties.Color = cs.FontColor;
-                            if (cs.FontName != null) style.textProperties.FontName = cs.FontName;
-                            if (cs.FontSize != null) style.textProperties.FontSize = $"{cs.FontSize}pt";
-                        }
-
-                        if (cs.BackgroundColor != null || cs.BorderTop != null || cs.BorderBottom != null || cs.BorderLeft != null || cs.BorderRight != null || cs.WrapText)
-                        {
-                            style.tableCellProperties = new ODContent.AutomaticStyles.Style.TableCellStyleProperties();
-                            if (cs.BackgroundColor != null) style.tableCellProperties.BackgroundColor = cs.BackgroundColor;
-                            if (cs.BorderTop != null) style.tableCellProperties.BorderTop = FormatOdsBorder(cs.BorderTop);
-                            if (cs.BorderBottom != null) style.tableCellProperties.BorderBottom = FormatOdsBorder(cs.BorderBottom);
-                            if (cs.BorderLeft != null) style.tableCellProperties.BorderLeft = FormatOdsBorder(cs.BorderLeft);
-                            if (cs.BorderRight != null) style.tableCellProperties.BorderRight = FormatOdsBorder(cs.BorderRight);
-                            if (cs.WrapText) style.tableCellProperties.WrapOption = "wrap";
-                        }
-
-                        file.automaticStyles.automaticStyles.Add(style);
+                        bool dateOnly = IsDateOnly(cell.Value);
+                        datePrefix = dateOnly ? "do|" : "dt|";
+                        if (dateOnly) hasDateOnly = true; else hasDateTime = true;
                     }
 
+                    var mapKey = datePrefix != null
+                        ? $"{datePrefix}{visualKey ?? ""}"
+                        : visualKey;
+
+                    if (mapKey == null) continue;
+                    if (map.ContainsKey(mapKey)) continue;
+
+                    var name = $"ce{nextIndex++}";
+                    map[mapKey] = name;
+
+                    var dataStyleName = datePrefix == "do|" ? OdsDateStyleName
+                        : datePrefix == "dt|" ? OdsDateTimeStyleName
+                        : "N0";
+
+                    var style = new ODContent.AutomaticStyles.Style
+                    {
+                        Name = name,
+                        Family = "table-cell",
+                        ParentStyleName = "Default",
+                        DataStyleName = dataStyleName
+                    };
+
+                    if (cs.Bold || cs.Italic || cs.Underline || cs.FontColor != null || cs.FontName != null || cs.FontSize != null)
+                    {
+                        style.textProperties = new ODContent.AutomaticStyles.Style.TextProperties();
+                        if (cs.Bold) style.textProperties.FontWeight = "bold";
+                        if (cs.Italic) style.textProperties.FontStyle = "italic";
+                        if (cs.Underline)
+                        {
+                            style.textProperties.TextUnderlineStyle = "solid";
+                            style.textProperties.TextUnderlineWidth = "auto";
+                        }
+                        if (cs.FontColor != null) style.textProperties.Color = cs.FontColor;
+                        if (cs.FontName != null) style.textProperties.FontName = cs.FontName;
+                        if (cs.FontSize != null) style.textProperties.FontSize = $"{cs.FontSize}pt";
+                    }
+
+                    if (cs.BackgroundColor != null || cs.BorderTop != null || cs.BorderBottom != null || cs.BorderLeft != null || cs.BorderRight != null || cs.WrapText)
+                    {
+                        style.tableCellProperties = new ODContent.AutomaticStyles.Style.TableCellStyleProperties();
+                        if (cs.BackgroundColor != null) style.tableCellProperties.BackgroundColor = cs.BackgroundColor;
+                        if (cs.BorderTop != null) style.tableCellProperties.BorderTop = FormatOdsBorder(cs.BorderTop);
+                        if (cs.BorderBottom != null) style.tableCellProperties.BorderBottom = FormatOdsBorder(cs.BorderBottom);
+                        if (cs.BorderLeft != null) style.tableCellProperties.BorderLeft = FormatOdsBorder(cs.BorderLeft);
+                        if (cs.BorderRight != null) style.tableCellProperties.BorderRight = FormatOdsBorder(cs.BorderRight);
+                        if (cs.WrapText) style.tableCellProperties.WrapOption = "wrap";
+                    }
+
+                    file.automaticStyles.automaticStyles.Add(style);
+                }
+
             return map;
+        }
+
+        private static bool IsDateOnly(string value) =>
+            DateTime.TryParse(value, out var dt) && dt.TimeOfDay == TimeSpan.Zero && !value.Contains('T');
+
+        private static byte[] InjectOdsDateStyles(byte[] contentXml, bool hasDateOnly, bool hasDateTime)
+        {
+            if (!hasDateOnly && !hasDateTime) return contentXml;
+
+            var xml = Encoding.UTF8.GetString(contentXml);
+            var sb = new StringBuilder();
+
+            if (hasDateOnly)
+            {
+                sb.Append($"<number:date-style style:name=\"{OdsDateStyleName}\">");
+                sb.Append("<number:year number:style=\"long\"/>");
+                sb.Append("<number:text>-</number:text>");
+                sb.Append("<number:month number:style=\"long\"/>");
+                sb.Append("<number:text>-</number:text>");
+                sb.Append("<number:day number:style=\"long\"/>");
+                sb.Append("</number:date-style>");
+            }
+
+            if (hasDateTime)
+            {
+                sb.Append($"<number:date-style style:name=\"{OdsDateTimeStyleName}\">");
+                sb.Append("<number:year number:style=\"long\"/>");
+                sb.Append("<number:text>-</number:text>");
+                sb.Append("<number:month number:style=\"long\"/>");
+                sb.Append("<number:text>-</number:text>");
+                sb.Append("<number:day number:style=\"long\"/>");
+                sb.Append("<number:text> </number:text>");
+                sb.Append("<number:hours number:style=\"long\"/>");
+                sb.Append("<number:text>:</number:text>");
+                sb.Append("<number:minutes number:style=\"long\"/>");
+                sb.Append("<number:text>:</number:text>");
+                sb.Append("<number:seconds number:style=\"long\"/>");
+                sb.Append("</number:date-style>");
+            }
+
+            xml = xml.Replace("<office:automatic-styles>", $"<office:automatic-styles>{sb}");
+            return Encoding.UTF8.GetBytes(xml);
         }
 
         private static string GetStyleKey(CellStyle s) =>

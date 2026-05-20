@@ -15,7 +15,7 @@
         /// <summary>
         /// Application that generated this file
         /// </summary>
-        public string Generator { get; set; } = "Open Standard Library v1";
+        public string Generator { get; set; } = AssemblyInfo.AppName;
 
         public string InitialCreator { get; set; } = "";
 
@@ -24,6 +24,12 @@
         public string CreationDate { get; set; } = "";
 
         public ColumnDelimeter ColumnDelimeter { get; set; } = ColumnDelimeter.Comma;
+
+        /// <summary>
+        /// Character encoding used when reading or writing delimited files (CSV, TSV, etc.).
+        /// Does not apply to ODS or XLSX formats, which require UTF-8 per their specifications.
+        /// </summary>
+        public FileEncoding FileEncoding { get; set; } = FileEncoding.UTF8;
 
         public List<oSpreadsheet> Sheets { get; set; }
 

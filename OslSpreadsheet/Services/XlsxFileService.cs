@@ -75,6 +75,16 @@ namespace OslSpreadsheet.Services
                     .ToList();
             }
 
+            // Load styles.xml to detect date-formatted cells
+            var dateXfIndices = new HashSet<int>();
+            var stylesEntry = archive.GetEntry("xl/styles.xml");
+            if (stylesEntry != null)
+            {
+                using var stylesStream = stylesEntry.Open();
+                var stylesDoc = await Task.Run(() => XDocument.Load(stylesStream));
+                dateXfIndices = GetDateXfIndices(stylesDoc, mainNs);
+            }
+
             // Load workbook.xml
             var wbEntry = archive.GetEntry("xl/workbook.xml")
                 ?? throw new InvalidOperationException("Invalid XLSX file: missing xl/workbook.xml");
@@ -153,7 +163,18 @@ namespace OslSpreadsheet.Services
                             default: // number
                                 value = rawValue;
                                 if (!string.IsNullOrEmpty(value))
-                                    valueType = CellValueType.Float;
+                                {
+                                    var styleIdx = int.TryParse(cellEl.Attribute("s")?.Value, out int s) ? s : -1;
+                                    if (styleIdx >= 0 && dateXfIndices.Contains(styleIdx) && double.TryParse(rawValue, out double serial))
+                                    {
+                                        valueType = CellValueType.DateTime;
+                                        value = System.DateTime.FromOADate(serial).ToString("yyyy-MM-ddTHH:mm:ss");
+                                    }
+                                    else
+                                    {
+                                        valueType = CellValueType.Float;
+                                    }
+                                }
                                 break;
                         }
 
@@ -173,6 +194,9 @@ namespace OslSpreadsheet.Services
                         sheet.AutoFilterRange = (startRow, startCol, endRow, endCol);
                     }
                 }
+
+                if ((sheet.AutoFilterRange?.StartRow == 1) || sheet.FreezeRows >= 1)
+                    sheet.HasHeaderRow = true;
             }
 
             return workbook;
@@ -240,8 +264,24 @@ namespace OslSpreadsheet.Services
             return Utf8(sb.ToString());
         }
 
+        private const int DateTimeNumFmtId = 164;
+        private const string DateTimeFormatCode = "yyyy-mm-dd hh:mm:ss";
+        private const int DateOnlyNumFmtId = 165;
+        private const string DateOnlyFormatCode = "yyyy-mm-dd";
+
+        private static bool IsDateOnly(string value) =>
+            System.DateTime.TryParse(value, out var dt) && dt.TimeOfDay == TimeSpan.Zero && !value.Contains('T');
+
+        private static readonly HashSet<int> BuiltInDateNumFmtIds =
+            new(Enumerable.Range(14, 9)
+                .Concat(Enumerable.Range(27, 10))
+                .Concat(Enumerable.Range(45, 3))
+                .Concat(Enumerable.Range(50, 9)));
+
         private static (byte[] stylesXml, Dictionary<string, int> styleIndexMap) BuildStylesForWorkbook(oWorkbook workbook)
         {
+            bool hasDateCells = workbook.Sheets.Any(s => s.Cells.Any(c => c.ValueType == CellValueType.DateTime));
+
             var defaultFontKey = GetFontKey(new CellStyle());
             var fonts = new List<string> { "<font><sz val=\"11\"/><name val=\"Calibri\"/></font>" };
             var fontKeys = new Dictionary<string, int> { [defaultFontKey] = 0 };
@@ -258,20 +298,25 @@ namespace OslSpreadsheet.Services
             var borderKeys = new Dictionary<string, int> { [defaultBorderKey] = 0 };
 
             var xfs = new List<string> { "<xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"0\" xfId=\"0\"/>" };
-            var xfKeys = new Dictionary<string, int> { ["0|0|0"] = 0 };
+            var xfKeys = new Dictionary<string, int> { ["0|0|0|False|0"] = 0 };
 
             var styleIndexMap = new Dictionary<string, int>();
 
-            var uniqueStyles = new Dictionary<string, CellStyle>();
+            var uniqueEntries = new Dictionary<string, (CellStyle style, int numFmtId)>();
             foreach (var sheet in workbook.Sheets)
                 foreach (var cell in sheet.Cells)
-                    if (cell.Style != null)
-                    {
-                        var key = GetStyleKey(cell.Style);
-                        uniqueStyles.TryAdd(key, cell.Style);
-                    }
+                {
+                    int numFmtId = cell.ValueType == CellValueType.DateTime
+                        ? (IsDateOnly(cell.Value) ? DateOnlyNumFmtId : DateTimeNumFmtId)
+                        : 0;
+                    var style = cell.Style ?? new CellStyle();
+                    var mapKey = numFmtId > 0 ? $"dt{numFmtId}|{GetStyleKey(style)}" : GetStyleKey(style);
 
-            foreach (var (key, style) in uniqueStyles)
+                    if (cell.Style != null || numFmtId > 0)
+                        uniqueEntries.TryAdd(mapKey, (style, numFmtId));
+                }
+
+            foreach (var (key, (style, numFmtId)) in uniqueEntries)
             {
                 var fk = GetFontKey(style);
                 if (!fontKeys.TryGetValue(fk, out int fontId))
@@ -297,11 +342,12 @@ namespace OslSpreadsheet.Services
                     borderKeys[bk] = borderId;
                 }
 
-                var xfk = $"{fontId}|{fillId}|{borderId}|{style.WrapText}";
+                var xfk = $"{fontId}|{fillId}|{borderId}|{style.WrapText}|{numFmtId}";
                 if (!xfKeys.TryGetValue(xfk, out int xfId))
                 {
                     xfId = xfs.Count;
-                    var xfSb = new StringBuilder($"<xf numFmtId=\"0\" fontId=\"{fontId}\" fillId=\"{fillId}\" borderId=\"{borderId}\" xfId=\"0\"");
+                    var xfSb = new StringBuilder($"<xf numFmtId=\"{numFmtId}\" fontId=\"{fontId}\" fillId=\"{fillId}\" borderId=\"{borderId}\" xfId=\"0\"");
+                    if (numFmtId > 0) xfSb.Append(" applyNumberFormat=\"1\"");
                     if (fontId > 0) xfSb.Append(" applyFont=\"1\"");
                     if (fillId > 0) xfSb.Append(" applyFill=\"1\"");
                     if (borderId > 0) xfSb.Append(" applyBorder=\"1\"");
@@ -324,6 +370,16 @@ namespace OslSpreadsheet.Services
             var sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
             sb.Append("<styleSheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">");
+            if (hasDateCells)
+            {
+                var usedFmtIds = uniqueEntries.Values.Select(e => e.numFmtId).Where(id => id > 0).Distinct().ToList();
+                sb.Append($"<numFmts count=\"{usedFmtIds.Count}\">");
+                if (usedFmtIds.Contains(DateTimeNumFmtId))
+                    sb.Append($"<numFmt numFmtId=\"{DateTimeNumFmtId}\" formatCode=\"{DateTimeFormatCode}\"/>");
+                if (usedFmtIds.Contains(DateOnlyNumFmtId))
+                    sb.Append($"<numFmt numFmtId=\"{DateOnlyNumFmtId}\" formatCode=\"{DateOnlyFormatCode}\"/>");
+                sb.Append("</numFmts>");
+            }
             sb.Append($"<fonts count=\"{fonts.Count}\">");
             foreach (var f in fonts) sb.Append(f);
             sb.Append("</fonts>");
@@ -340,6 +396,30 @@ namespace OslSpreadsheet.Services
             sb.Append("</styleSheet>");
 
             return (Utf8(sb.ToString()), styleIndexMap);
+        }
+
+        private static HashSet<int> GetDateXfIndices(XDocument stylesDoc, XNamespace ns)
+        {
+            var dateNumFmtIds = new HashSet<int>(BuiltInDateNumFmtIds);
+
+            foreach (var nf in stylesDoc.Descendants(ns + "numFmt"))
+            {
+                var id = int.TryParse(nf.Attribute("numFmtId")?.Value, out int nfId) ? nfId : 0;
+                var code = nf.Attribute("formatCode")?.Value ?? "";
+                if (code.Contains('y') || code.Contains('d') || code.Contains('h'))
+                    dateNumFmtIds.Add(id);
+            }
+
+            var result = new HashSet<int>();
+            var xfs = stylesDoc.Descendants(ns + "cellXfs").Elements(ns + "xf").ToList();
+            for (int i = 0; i < xfs.Count; i++)
+            {
+                var numFmtId = int.TryParse(xfs[i].Attribute("numFmtId")?.Value, out int nfId) ? nfId : 0;
+                if (dateNumFmtIds.Contains(numFmtId))
+                    result.Add(i);
+            }
+
+            return result;
         }
 
         private static string GetStyleKey(CellStyle s) =>
@@ -429,14 +509,24 @@ namespace OslSpreadsheet.Services
                 {
                     var cellRef = $"{ColumnLetter(cell.Column)}{cell.Row}";
                     var styleAttr = "";
-                    if (cell.Style != null)
+                    var visualKey = cell.Style != null ? GetStyleKey(cell.Style) : null;
+
+                    if (cell.ValueType == CellValueType.DateTime)
                     {
-                        var key = GetStyleKey(cell.Style);
-                        if (styleIndexMap.TryGetValue(key, out int si) && si > 0)
+                        int fmtId = IsDateOnly(cell.Value) ? DateOnlyNumFmtId : DateTimeNumFmtId;
+                        var dateKey = visualKey != null ? $"dt{fmtId}|{visualKey}" : $"dt{fmtId}|{GetStyleKey(new CellStyle())}";
+                        if (styleIndexMap.TryGetValue(dateKey, out int si))
+                            styleAttr = $" s=\"{si}\"";
+                    }
+                    else if (visualKey != null)
+                    {
+                        if (styleIndexMap.TryGetValue(visualKey, out int si) && si > 0)
                             styleAttr = $" s=\"{si}\"";
                     }
 
-                    if (cell.ValueType == CellValueType.Float)
+                    if (cell.ValueType == CellValueType.DateTime && System.DateTime.TryParse(cell.Value, out var dt))
+                        sb.Append($"<c r=\"{cellRef}\"{styleAttr}><v>{dt.ToOADate()}</v></c>");
+                    else if (cell.ValueType == CellValueType.Float || cell.ValueType == CellValueType.Int64)
                         sb.Append($"<c r=\"{cellRef}\"{styleAttr}><v>{SecurityElement.Escape(cell.Value)}</v></c>");
                     else if (cell.ValueType == CellValueType.Boolean)
                         sb.Append($"<c r=\"{cellRef}\"{styleAttr} t=\"b\"><v>{(cell.Value.Equals("true", StringComparison.OrdinalIgnoreCase) ? "1" : "0")}</v></c>");

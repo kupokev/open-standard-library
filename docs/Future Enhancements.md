@@ -4,6 +4,7 @@ Items planned for future development.
 
 ---
 
-## Use Case: Replacing ClosedXML in Semantic Modeler
+## CSV Enhancements
 
-The `ExportService` in FactFoundry's Semantic Modeler currently uses ClosedXML to generate data dictionary Excel exports. All required features for the swap are now implemented — see `Changelog.md`.
+- **Date format option** — configurable date format string (e.g. `yyyy-MM-dd`, `MM/dd/yyyy`) for normalizing DateTime cell values on CSV export, rather than passing through the raw string
+

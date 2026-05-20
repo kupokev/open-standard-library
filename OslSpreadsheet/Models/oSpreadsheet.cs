@@ -29,6 +29,24 @@
 
         public int FreezeColumns { get; set; }
 
+        /// <summary>
+        /// Indicates whether the first row contains column headers.
+        /// When true, HeaderNames and GetColumn(string) become available.
+        /// </summary>
+        public bool HasHeaderRow { get; set; }
+
+        /// <summary>
+        /// Returns the values from the first row when HasHeaderRow is true; otherwise an empty list.
+        /// </summary>
+        public List<string> HeaderNames
+        {
+            get
+            {
+                if (!HasHeaderRow || !_cells.Any()) return new List<string>();
+                return GetRow(1).Select(c => c.Value).ToList();
+            }
+        }
+
         public (int StartRow, int StartCol, int EndRow, int EndCol)? AutoFilterRange { get; set; }
 
         public Dictionary<int, double> ColumnWidths { get => _columnWidths; }
@@ -143,6 +161,20 @@
         public List<oCell> GetRow(int index)
         {
             return _cells.Where(x => x.Row == index).OrderBy(x => x.Column).ToList();
+        }
+
+        /// <summary>
+        /// Returns all data cells in the column matching the given header name (excludes the header row itself).
+        /// Requires HasHeaderRow to be true.
+        /// </summary>
+        /// <param name="headerName"></param>
+        /// <returns></returns>
+        public List<oCell> GetColumn(string headerName)
+        {
+            if (!HasHeaderRow) return new List<oCell>();
+            var headerCell = GetRow(1).FirstOrDefault(c => c.Value == headerName);
+            if (headerCell == null) return new List<oCell>();
+            return _cells.Where(c => c.Column == headerCell.Column && c.Row > 1).OrderBy(c => c.Row).ToList();
         }
 
         /// <summary>

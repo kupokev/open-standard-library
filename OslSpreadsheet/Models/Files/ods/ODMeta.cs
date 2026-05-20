@@ -30,7 +30,7 @@ namespace OslSpreadsheet.Models.Files.ods
 
         public class Meta
         {
-            private static readonly string _appName = "Open Standard Library v1.0.0";
+            private static readonly string _appName = OslSpreadsheet.AssemblyInfo.AppName;
             private readonly DateTime _date;
 
             private DateTime? _creationDate;

@@ -58,10 +58,7 @@ namespace OslSpreadsheet.Services
                     );
             }
 
-            if(workbook.ColumnDelimeter == ColumnDelimeter.ASCII)
-                output = Encoding.ASCII.GetBytes(result);
-            else
-                output = Encoding.UTF8.GetBytes(result);
+            output = GetEncoding(workbook.FileEncoding).GetBytes(result);
 
             return Task.FromResult(output);
         }
@@ -131,7 +128,7 @@ namespace OslSpreadsheet.Services
                 if (file == null || file.Length == 0) throw new ArgumentNullException("File is empty");
 
                 // Convert file to string and replace line endings with Environment.NewLine
-                var contents = Encoding.UTF8.GetString(file).ReplaceLineEndings(Environment.NewLine);
+                var contents = GetEncoding(workbook.FileEncoding).GetString(file).ReplaceLineEndings(Environment.NewLine);
 
                 // Split the contents into multiple rows
                 var lines = contents.Split(Environment.NewLine).ToList();
@@ -153,7 +150,8 @@ namespace OslSpreadsheet.Services
                     // Cycle through the columns and add to list
                     for (int c = 0; c < cols.Count(); c++)
                     {
-                        sheet1.AddCell(r + 1, c + 1, cols[c]);
+                        // Unescape doubled quotes per RFC-4180
+                        sheet1.AddCell(r + 1, c + 1, cols[c].Replace("\"\"", "\""));
                     }
                 }
             }
@@ -164,6 +162,19 @@ namespace OslSpreadsheet.Services
 
             return workbook;
         }
+
+        /// <summary>
+        /// Maps a FileEncoding enum value to its corresponding System.Text.Encoding instance.
+        /// </summary>
+        /// <param name="fileEncoding"></param>
+        /// <returns></returns>
+        private static Encoding GetEncoding(FileEncoding fileEncoding) => fileEncoding switch
+        {
+            FileEncoding.ASCII => Encoding.ASCII,
+            FileEncoding.Unicode => Encoding.Unicode,
+            FileEncoding.UTF32 => Encoding.UTF32,
+            _ => Encoding.UTF8
+        };
 
         public void Dispose() { }
 

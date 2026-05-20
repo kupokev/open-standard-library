@@ -4,6 +4,22 @@ All notable changes to Open Standard Library will be documented in this file.
 
 ---
 
+## v1.0.2 — 2026-05-19
+
+### Added
+- **File encoding options** — Added `FileEncoding` enum (`UTF8`, `ASCII`, `Unicode`, `UTF32`) and `FileEncoding` property on `oWorkbook`. Delimited file export and import now use the configured encoding instead of hardcoded UTF-8. Does not affect ODS or XLSX, which require UTF-8 per their specifications
+- **Dynamic version string** — Generator name and version are now derived from the assembly version at runtime, which is set automatically from the git tag during CI builds. Replaces hardcoded version strings in `oWorkbook` and ODS metadata
+- **Header row detection** — Added `HasHeaderRow` property, `HeaderNames` computed property, and `GetColumn(string headerName)` method to `oSpreadsheet`. When `HasHeaderRow` is true, first-row values are exposed as column names and data cells can be retrieved by header name. XLSX and ODS import auto-detect header rows when the sheet has an autoFilter starting at row 1 or frozen panes on the first row
+- **Streaming CSV row reader** — Added `ReadCsvRowsAsync(Stream, bool hasHeaderRow, int? rowLimit)` to `Spreadsheet`. Reads rows one at a time via `IAsyncEnumerable<string[]>` without loading the entire file into memory. Supports optional header row consumption (stored in `CsvHeaders`) and row limit
+- **DateTime and Int64 cell value types** — Added `CellValueType.DateTime` and `CellValueType.Int64`. DateTime values are stored as ISO 8601 strings and round-trip through both XLSX (OLE Automation serial dates with numFmt style) and ODS (`office:date-value` attribute). Int64 is exported as a numeric value in both formats. XLSX import detects date-formatted cells by reading styles.xml numFmtIds
+- **Epoch time conversion** — Added `FromEpochSeconds()`, `FromEpochMilliseconds()`, `ToEpochSeconds()`, and `ToEpochMilliseconds()` extension methods on `oCell`. Converts between Unix epoch timestamps and ISO 8601 DateTime values. All conversions treat values as UTC
+- **Date-only formatting** — DateTime cells with date-only values (no time component) now use a `yyyy-mm-dd` format in both XLSX and ODS, instead of showing `00:00:00` for the time portion
+
+### Fixed
+- **CSV import quote-escaping bug** — Doubled quotes (`""`) are now correctly unescaped to single quotes (`"`) on CSV import per RFC-4180
+
+---
+
 ## v1.0.1 — 2026-05-01
 
 ### Added
@@ -25,9 +41,6 @@ All notable changes to Open Standard Library will be documented in this file.
 - **Boolean cell value type** — Added `CellValueType.Boolean` with full generate/import support for both XLSX (`t="b"`) and ODS (`office:boolean-value`). Values stored as `"true"`/`"false"` strings
 - **Test project** — Added `OslSpreadsheet.Tests` with 102 xUnit tests covering workbook creation, sheet/cell operations, boolean values, cell styling, text wrapping, freeze panes, column widths, and round-trip generate/import for ODS, XLSX, and CSV formats
 - **CI/CD** — GitHub Actions workflow to publish to NuGet on version tags
-
-### Known Issues
-- **CSV import quote-escaping bug** — Embedded double-quotes are not unescaped on import (e.g., `5"" Fitting` stays as-is instead of becoming `5" Fitting`)
 
 ---
 
