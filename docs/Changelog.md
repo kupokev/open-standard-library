@@ -4,6 +4,15 @@ All notable changes to Open Standard Library will be documented in this file.
 
 ---
 
+## v1.0.3 — 2026-05-19
+
+### Changed
+- **Resolved all compiler warnings** — Fixed nullable value type warnings in `AutoFilterTests`, non-nullable property warnings in `InMemoryFile` and `ODContent`, null reference warnings in `XmlService`, unused variable in `XmlService`, and async `EndOfStream` usage in `Spreadsheet` (CA2024)
+- **XML documentation** — Added XML doc comments to `ISpreadsheet`, `Spreadsheet`, `InMemoryFile`, `XmlService`, and all `AutoFilterTests` methods
+- **CI/CD** — Opted into Node.js 24 for GitHub Actions to resolve Node.js 20 deprecation warnings
+
+---
+
 ## v1.0.2 — 2026-05-19
 
 ### Added
