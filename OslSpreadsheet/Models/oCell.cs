@@ -29,6 +29,8 @@
     {
         String,
         Float,
-        Boolean
+        Boolean,
+        DateTime,
+        Int64
     }
 }

@@ -11,6 +11,7 @@ All notable changes to Open Standard Library will be documented in this file.
 - **Dynamic version string** — Generator name and version are now derived from the assembly version at runtime, which is set automatically from the git tag during CI builds. Replaces hardcoded version strings in `oWorkbook` and ODS metadata
 - **Header row detection** — Added `HasHeaderRow` property, `HeaderNames` computed property, and `GetColumn(string headerName)` method to `oSpreadsheet`. When `HasHeaderRow` is true, first-row values are exposed as column names and data cells can be retrieved by header name
 - **Streaming CSV row reader** — Added `ReadCsvRowsAsync(Stream, bool hasHeaderRow, int? rowLimit)` to `Spreadsheet`. Reads rows one at a time via `IAsyncEnumerable<string[]>` without loading the entire file into memory. Supports optional header row consumption (stored in `CsvHeaders`) and row limit
+- **DateTime and Int64 cell value types** — Added `CellValueType.DateTime` and `CellValueType.Int64`. DateTime values are stored as ISO 8601 strings and round-trip through both XLSX (OLE Automation serial dates with numFmt style) and ODS (`office:date-value` attribute). Int64 is exported as a numeric value in both formats. XLSX import detects date-formatted cells by reading styles.xml numFmtIds
 
 ### Fixed
 - **CSV import quote-escaping bug** — Doubled quotes (`""`) are now correctly unescaped to single quotes (`"`) on CSV import per RFC-4180

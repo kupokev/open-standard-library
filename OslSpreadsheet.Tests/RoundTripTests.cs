@@ -427,6 +427,144 @@ public class RoundTripTests
         Assert.Equal(CellValueType.Boolean, row.First(c => c.Column == 3).ValueType);
     }
 
+    // --- DateTime ---
+
+    /// <summary>
+    /// Verifies DateTime cell values survive an XLSX round-trip with ISO 8601 format.
+    /// </summary>
+    [Fact]
+    public async Task Xlsx_RoundTrip_PreservesDateTimeValues()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Date");
+        sheet.AddCell(2, 1, "2026-05-19T10:30:00", CellValueType.DateTime);
+
+        var bytes = await spreadsheet.GenerateXlsxFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportXlsxFileAsync(bytes);
+        var imported = workbook.Sheets[0];
+
+        var dateCell = imported.GetRow(2).First(c => c.Column == 1);
+        Assert.Equal(CellValueType.DateTime, dateCell.ValueType);
+        Assert.Equal("2026-05-19T10:30:00", dateCell.Value);
+    }
+
+    /// <summary>
+    /// Verifies DateTime cell values survive an ODS round-trip.
+    /// </summary>
+    [Fact]
+    public async Task Ods_RoundTrip_PreservesDateTimeValues()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Date");
+        sheet.AddCell(2, 1, "2026-05-19T10:30:00", CellValueType.DateTime);
+
+        var bytes = await spreadsheet.GenerateOdsFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportOdsFileAsync(bytes);
+        var imported = workbook.Sheets[0];
+
+        var dateCell = imported.GetRow(2).First(c => c.Column == 1);
+        Assert.Equal(CellValueType.DateTime, dateCell.ValueType);
+        Assert.Equal("2026-05-19T10:30:00", dateCell.Value);
+    }
+
+    /// <summary>
+    /// Verifies date-only values (no time component) survive an XLSX round-trip.
+    /// </summary>
+    [Fact]
+    public async Task Xlsx_RoundTrip_DateOnly()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "2026-01-15", CellValueType.DateTime);
+
+        var bytes = await spreadsheet.GenerateXlsxFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportXlsxFileAsync(bytes);
+        var cell = workbook.Sheets[0].GetRow(1).First();
+
+        Assert.Equal(CellValueType.DateTime, cell.ValueType);
+        Assert.StartsWith("2026-01-15", cell.Value);
+    }
+
+    // --- Int64 ---
+
+    /// <summary>
+    /// Verifies Int64 cell values survive an XLSX round-trip as numeric values.
+    /// </summary>
+    [Fact]
+    public async Task Xlsx_RoundTrip_PreservesInt64Values()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "Count");
+        sheet.AddCell(2, 1, "42", CellValueType.Int64);
+        sheet.AddCell(3, 1, "9999999999", CellValueType.Int64);
+
+        var bytes = await spreadsheet.GenerateXlsxFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportXlsxFileAsync(bytes);
+        var imported = workbook.Sheets[0];
+
+        var cell1 = imported.GetRow(2).First(c => c.Column == 1);
+        Assert.Equal("42", cell1.Value);
+
+        var cell2 = imported.GetRow(3).First(c => c.Column == 1);
+        Assert.Equal("9999999999", cell2.Value);
+    }
+
+    /// <summary>
+    /// Verifies Int64 cell values survive an ODS round-trip.
+    /// </summary>
+    [Fact]
+    public async Task Ods_RoundTrip_PreservesInt64Values()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Data");
+        sheet.AddCell(1, 1, "42", CellValueType.Int64);
+
+        var bytes = await spreadsheet.GenerateOdsFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportOdsFileAsync(bytes);
+        var cell = workbook.Sheets[0].GetRow(1).First();
+
+        Assert.Equal("42", cell.Value);
+    }
+
+    /// <summary>
+    /// Verifies all value types can coexist in a single XLSX round-trip.
+    /// </summary>
+    [Fact]
+    public async Task Xlsx_RoundTrip_AllValueTypes()
+    {
+        using var spreadsheet = new Spreadsheet();
+        var sheet = spreadsheet.Workbook.AddSheet("Mixed");
+        sheet.AddCell(1, 1, "Hello", CellValueType.String);
+        sheet.AddCell(1, 2, "3.14", CellValueType.Float);
+        sheet.AddCell(1, 3, "true", CellValueType.Boolean);
+        sheet.AddCell(1, 4, "2026-05-19T00:00:00", CellValueType.DateTime);
+        sheet.AddCell(1, 5, "100", CellValueType.Int64);
+
+        var bytes = await spreadsheet.GenerateXlsxFileAsync();
+
+        using var importer = new Spreadsheet();
+        var workbook = await importer.ImportXlsxFileAsync(bytes);
+        var row = workbook.Sheets[0].GetRow(1);
+
+        Assert.Equal(CellValueType.String, row.First(c => c.Column == 1).ValueType);
+        Assert.Equal(CellValueType.Float, row.First(c => c.Column == 2).ValueType);
+        Assert.Equal(CellValueType.Boolean, row.First(c => c.Column == 3).ValueType);
+        Assert.Equal(CellValueType.DateTime, row.First(c => c.Column == 4).ValueType);
+    }
+
     // --- Header row ---
 
     /// <summary>

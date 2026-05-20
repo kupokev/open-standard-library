@@ -134,6 +134,12 @@ namespace OslSpreadsheet.Services
                                 cellType = CellValueType.Boolean;
                                 cellValue = booleanValue ?? textValue ?? "false";
                             }
+                            else if (valueType == "date")
+                            {
+                                cellType = CellValueType.DateTime;
+                                var dateValue = cell.Attribute(officeNs + "date-value")?.Value;
+                                cellValue = dateValue ?? textValue ?? "";
+                            }
                             else if (valueType == "float")
                             {
                                 cellType = CellValueType.Float;
@@ -305,7 +311,7 @@ namespace OslSpreadsheet.Services
                                     TextValue = cell.Value
                                 };
 
-                                if (cell.ValueType == CellValueType.Float)
+                                if (cell.ValueType == CellValueType.Float || cell.ValueType == CellValueType.Int64)
                                 {
                                     tableCell.ValueType = "float";
                                     tableCell.NumericValue = cell.Value;
@@ -314,6 +320,11 @@ namespace OslSpreadsheet.Services
                                 {
                                     tableCell.ValueType = "boolean";
                                     tableCell.BooleanValue = cell.Value.Equals("true", StringComparison.OrdinalIgnoreCase) ? "true" : "false";
+                                }
+                                else if (cell.ValueType == CellValueType.DateTime)
+                                {
+                                    tableCell.ValueType = "date";
+                                    tableCell.DateValue = cell.Value;
                                 }
                                 else
                                 {
